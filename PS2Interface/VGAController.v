@@ -31,15 +31,10 @@ module VGAController(
 		VIDEO_WIDTH = 640,  // Standard VGA Width
 		VIDEO_HEIGHT = 480; // Standard VGA Height
 
+    // these are provided by the VGATimingGenerator, x and y are current x and y that we scan over
 	wire active, screenEnd;
 	wire[9:0] x;
 	wire[8:0] y;
-	
-	// top left of square x and y, and then square width
-	reg[9:0] xtl = VIDEO_WIDTH / 2;
-	reg[8:0] ytl = VIDEO_HEIGHT / 2;
-	reg[6:0] width = 100;
-	// square color is 12'b111100000000; red is f, green and blue are 0
 	
 	VGATimingGenerator #(
 		.HEIGHT(VIDEO_HEIGHT), // Use the standard VGA Values
@@ -91,7 +86,34 @@ module VGAController(
 		.dataOut(colorData),				       // Color at current pixel
 		.wEn(1'b0)); 						       // We're always active
 		
-		
+	
+	// begin my code:
+	
+	// in order to draw blocks moving down, need registers to store their coordinate and their color
+	// need to store the coordinate of EACH block and then destroy them when they exit screen
+	// can use array of registers like audioController, maybe initialize to some high value to indicate that no block is at that stage
+	
+	// code below from audio controller
+	/* // Initialize the frequency array. FREQs[0] = 261
+	reg[10:0] FREQs[0:15];
+	initial begin
+		$readmemh("FREQs.mem", FREQs);
+	end
+	integer index = 0;
+	
+	always @(posedge clk) begin
+	   index = switches; // assign 4 bits to an integer
+	   CounterLimit <= SYSTEM_FREQ / (2 * FREQs[index]) - 1;
+    */
+	
+	
+	
+	// top left of square x and y, and then square width
+	reg[9:0] xtl = VIDEO_WIDTH / 2;
+	reg[8:0] ytl = VIDEO_HEIGHT / 2;
+	reg[6:0] width = 100;
+	// square color is 12'b111100000000; red is f, green and blue are 0
+
     always @(posedge screenEnd) begin
         ytl = move_up ? ytl - 1 : ytl;
         ytl = move_down ? ytl + 1 : ytl;
