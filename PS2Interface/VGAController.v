@@ -2,20 +2,20 @@
 module VGAController(     
 	input clk, 			// 100 MHz System Clock
 	input reset, 		// Reset Signal
+	input move_up,
+	input move_down,
+	input move_right,
+	input move_left,
 	output hSync, 		// H Sync Signal
 	output vSync, 		// Veritcal Sync Signal
 	output[3:0] VGA_R,  // Red Signal Bits
 	output[3:0] VGA_G,  // Green Signal Bits
 	output[3:0] VGA_B,  // Blue Signal Bits
 	inout ps2_clk,
-	inout ps2_data,
-	input left,
-	input right,
-	input up,
-	input down);
+	inout ps2_data);
 	
 	// Lab Memory Files Location
-	localparam FILES_PATH = "C:/Users/sg491/OneDrive - Duke University/Documents/Lab5/";
+	localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/lab5_ece350/Lab5/";
 
 	// Clock divider 100 MHz -> 25 MHz
 	wire clk25; // 25MHz clock
@@ -35,6 +35,11 @@ module VGAController(
 	wire[9:0] x;
 	wire[8:0] y;
 	
+	// top left of square x and y, and then square width
+	reg[9:0] xtl = VIDEO_WIDTH / 2;
+	reg[8:0] ytl = VIDEO_HEIGHT / 2;
+	reg[6:0] width = 100;
+	// square color is 12'b111100000000; red is f, green and blue are 0
 	
 	VGATimingGenerator #(
 		.HEIGHT(VIDEO_HEIGHT), // Use the standard VGA Values
@@ -84,82 +89,39 @@ module VGAController(
 		.clk(clk), 							   	   // Rising edge of the 100 MHz clk
 		.addr(colorAddr),					       // Address from the ImageData RAM
 		.dataOut(colorData),				       // Color at current pixel
-		.wEn(1'b0)); 						       // We're always reading
-	
-	wire[7:0] spriteAddr;
-	wire spriteData;
-	wire[7:0] spriteAddr;
-	wire[7:0] asciiAddr;
-	
-	
-    RAM #(
-		.DEPTH(4700), 		       // Set depth to contain every color		
-		.DATA_WIDTH(50), 		       // Set data width according to the bits per color
-		.ADDRESS_WIDTH(2500),     // Set address width according to the color count
-		.MEMFILE({FILES_PATH, "sprites.mem"}))
-    Sprites(
-		.clk(clk), 							   	   // Rising edge of the 100 MHz clk
-		.addr(spriteAddr),					       // Address from the ImageData RAM
-		.dataOut(spriteData),				       // Color at current pixel
-		.wEn(1'b0));   // Memory initialization
+		.wEn(1'b0)); 						       // We're always active
 		
-    RAM #(
-		.DEPTH(256), 		       // Set depth to contain every color		
-		.DATA_WIDTH(8), 		       // Set data width according to the bits per color
-		.ADDRESS_WIDTH(8),     // Set address width according to the color count
-		.MEMFILE({FILES_PATH, "ascii.mem"}))
-    Ascii(
-		.clk(clk), 							   	   // Rising edge of the 100 MHz clk
-		.addr(asciiAddr),					       // Address from the ImageData RAM
-		.dataOut(spriteAddr),				       // Color at current pixel
-		.wEn(1'b0));   // Memory initialization
 		
-	Ps2Interface interface(
-	   .ps2_clk(ps2_clk),
-	   .ps2_data(ps2_data),
-	   .clk(ps2_clk),
-	   .rst(1'b0),
-	   .tx_data(),
-	   .write_data(),
-	   .rx_data(asciiAddr),
-	   .read_data(),
-	   .busy(),
-	   .err()
-	);	
-
-	// Square
-	reg[9:0] ref_x = 0;
-	reg[8:0] ref_y = 0;
-	
-	wire[BITS_PER_COLOR-1:0] new_data;
-    wire square;
+    always @(posedge screenEnd) begin
+        ytl = move_up ? ytl - 1 : ytl;
+        ytl = move_down ? ytl + 1 : ytl;
+        xtl = move_left ? xtl - 1 : xtl;
+        xtl = move_right ? xtl + 1 : xtl;
+        if (ytl < 2)
+            ytl = 2;
+        if (xtl < 2)
+            xtl = 2;
+        if (ytl + width > VIDEO_HEIGHT)
+            ytl = VIDEO_HEIGHT - width;
+        if (xtl + width > VIDEO_WIDTH)
+            xtl = VIDEO_WIDTH - width;   
+    end
     
-	assign square = (x>ref_x) & (x < ref_x + 50) & (y>ref_y) & (y < ref_y + 50);
-	assign new_data = square ? spriteData : colorData;
-	
+    wire top, left, right, bottom;
+    assign top = y > ytl;
+    assign left = x > xtl;
+    assign right = x < xtl + width;
+    assign bottom = y < ytl + width;
+    
+    wire inSquare;
+    and(inSquare, top, left, right, bottom);
+
+    wire [11:0] felixColor;
+    assign felixColor = inSquare ? 12'b111100000000 : colorData;
+
 	// Assign to output color from register if active
 	wire[BITS_PER_COLOR-1:0] colorOut; 			  // Output color 
-	assign colorOut = active ? new_data : 12'd0; // When not active, output black
-	
-    always @(posedge screenEnd) begin
-		ref_x = left ? ref_x-1 : ref_x;
-		ref_x = right ? ref_x+1 : ref_x;
-		ref_y = down ? ref_y+1 : ref_y;
-		ref_y = up ? ref_y-1 : ref_y;
-		
-		if(ref_x<1) begin
-		  ref_x = 1;
-		end
-		if(ref_y<1) begin
-		  ref_y = 1;
-		end
-		if(ref_x>590) begin
-		  ref_x = 590;
-		end
-		if(ref_y>430) begin
-		  ref_y = 430;
-		end
-	end
+	assign colorOut = active ? felixColor : 12'd0; // When not active, output black
 
 	// Quickly assign the output colors to their channels using concatenation
 	assign {VGA_R, VGA_G, VGA_B} = colorOut;
