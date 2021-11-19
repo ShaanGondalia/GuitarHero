@@ -37,6 +37,9 @@
 ./multdiv/control.v
 ./multdiv/counter_tb.v
 ./multdiv/counter32.v
+./PS2Interface/VGAController.v
+./PS2Interface/VGATimingGenerator.v
+./PS2Interface/RAM.v
 ./Wrapper_tb.v
 ./Wrapper.v
 ./RAM.v

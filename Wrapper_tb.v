@@ -43,7 +43,9 @@ module Wrapper_tb #(parameter FILE = "nop");
 	localparam DEFAULT_CYCLES = 255;
 
 	// Inputs to the processor
-	reg clock = 0, reset = 0;
+	reg clock = 0, reset = 0, gameclk = 0, strum = 0;
+	reg [3:0] buttons = 4'b0;
+	reg [3:0] intersections = 4'b0;
 
 	// I/O for the processor
 	wire rwe, mwe;
@@ -92,7 +94,13 @@ module Wrapper_tb #(parameter FILE = "nop");
 									
 		// RAM
 		.wren(mwe), .address_dmem(memAddr), 
-		.data(memDataIn), .q_dmem(memDataOut)); 
+		.data(memDataIn), .q_dmem(memDataOut),
+
+		// Guitar Hero
+		.buttons(buttons),
+		.intersections(intersections),
+		.strum(strum),
+		.gameclk(gameclk)); 
 	
 	// Instruction Memory (ROM)
 	ROM #(.MEMFILE({DIR, MEM_DIR, FILE, ".mem"}))

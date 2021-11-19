@@ -24,14 +24,16 @@
  *
  **/
 
-module Wrapper (clock, reset);
-	input clock, reset;
+module Wrapper (clock, reset, gameclk, buttons, intersections, strum);
+	input clock, reset, gameclk, strum;
+	input [3:0] buttons, intersections;
 
 	wire rwe, mwe;
 	wire[4:0] rd, rs1, rs2;
 	wire[31:0] instAddr, instData, 
 		rData, regA, regB,
 		memAddr, memDataIn, memDataOut;
+
 
 
 	// ADD YOUR MEMORY FILE HERE
@@ -50,7 +52,13 @@ module Wrapper (clock, reset);
 									
 		// RAM
 		.wren(mwe), .address_dmem(memAddr), 
-		.data(memDataIn), .q_dmem(memDataOut)); 
+		.data(memDataIn), .q_dmem(memDataOut),
+
+		// Guitar Hero
+		.buttons(buttons),
+		.intersections(intersections),
+		.strum(strum),
+		.gameclk(gameclk)); 
 	
 	// Instruction Memory (ROM)
 	ROM #(.MEMFILE({INSTR_FILE, ".mem"}))
