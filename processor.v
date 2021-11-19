@@ -45,7 +45,8 @@ module processor(
     buttons,
     intersections,
     strum,
-    gameclk
+    gameclk,
+    score
 	);
 
 	// Control signals
@@ -71,6 +72,7 @@ module processor(
     input [3:0] intersections;
     input strum;
     input gameclk;
+    output [31:0] score;
 
     // Reg wires
     wire [31:0] pci, pco; // PC out and in
@@ -122,10 +124,10 @@ module processor(
         .clear(reset), .data(fd_pci), .data_out(pco));
 
     // Guitar Hero Hardware
-    wire old_strum, new_strum, guitar_update, guitar_inc;
-    guitar guitar_ctrl(.old_strum(old_strum), .new_strum(new_strum), 
+    wire old_strum, new_strum, guitar_update, guitar_inc, guitar_score;
+    guitar guitar_ctrl(.mw_ir(mw_ir), .old_strum(old_strum), .new_strum(new_strum), 
         .buttons(buttons), .intersections(intersections), 
-        .update(guitar_update), .inc(guitar_inc));
+        .update(guitar_update), .inc(guitar_inc), .score_out(guitar_score));
 
     dffe_neg new_s(.q(new_strum), .d(strum), .clk(gameclk), .en(1'b1), .clr(reset));
     dffe_neg old_s(.q(old_strum), .d(new_strum), .clk(clock), .en(1'b1), .clr(reset));
@@ -232,5 +234,6 @@ module processor(
 
     // Writeback Stage
     mux_4 writeback(.out(wb_data), .select(dp_wb), .in0(mw_o), .in1(mw_d), .in2(mult_res), .in3(mw_pco));
+    assign score = score_out ? wb_data : 32'b0;
 
 endmodule

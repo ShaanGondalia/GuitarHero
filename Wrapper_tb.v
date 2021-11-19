@@ -33,7 +33,7 @@
  *
  **/
 
-module Wrapper_tb #(parameter FILE = "nop");
+module Wrapper_tb #(parameter FILE = "guitar_hero");
 
 	// FileData
 	localparam DIR = "Test Files/";
@@ -52,7 +52,7 @@ module Wrapper_tb #(parameter FILE = "nop");
 	wire[4:0] rd, rs1, rs2;
 	wire[31:0] instAddr, instData, 
 		rData, regA, regB,
-		memAddr, memDataIn, memDataOut;
+		memAddr, memDataIn, memDataOut, score;
 
 	// Wires for Test Harness
 	wire[4:0] rs1_test, rs1_in;
@@ -100,7 +100,8 @@ module Wrapper_tb #(parameter FILE = "nop");
 		.buttons(buttons),
 		.intersections(intersections),
 		.strum(strum),
-		.gameclk(gameclk)); 
+		.gameclk(gameclk),
+		.score(score)); 
 	
 	// Instruction Memory (ROM)
 	ROM #(.MEMFILE({DIR, MEM_DIR, FILE, ".mem"}))

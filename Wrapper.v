@@ -24,9 +24,10 @@
  *
  **/
 
-module Wrapper (clock, reset, gameclk, buttons, intersections, strum);
+module Wrapper (clock, reset, gameclk, buttons, intersections, strum, score);
 	input clock, reset, gameclk, strum;
 	input [3:0] buttons, intersections;
+	output [31:0] score;
 
 	wire rwe, mwe;
 	wire[4:0] rd, rs1, rs2;
@@ -37,7 +38,7 @@ module Wrapper (clock, reset, gameclk, buttons, intersections, strum);
 
 
 	// ADD YOUR MEMORY FILE HERE
-	localparam INSTR_FILE = "";
+	localparam INSTR_FILE = "guitar_hero";
 	
 	// Main Processing Unit
 	processor CPU(.clock(clock), .reset(reset), 
@@ -58,7 +59,8 @@ module Wrapper (clock, reset, gameclk, buttons, intersections, strum);
 		.buttons(buttons),
 		.intersections(intersections),
 		.strum(strum),
-		.gameclk(gameclk)); 
+		.gameclk(gameclk),
+		.score(score)); 
 	
 	// Instruction Memory (ROM)
 	ROM #(.MEMFILE({INSTR_FILE, ".mem"}))
