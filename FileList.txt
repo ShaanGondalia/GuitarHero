@@ -46,6 +46,7 @@
 ./processor.v
 ./ROM.v
 ./control/stall.v
+./control/guitar.v
 ./control/mult_ctrl.v
 ./control/bypass.v
 ./control/datapath.v

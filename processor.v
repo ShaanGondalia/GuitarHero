@@ -118,8 +118,23 @@ module processor(
     stall s_ctrl(.fd_ir(fd_ir), .dx_ir(dx_ir), .xm_ir(xm_ir), .stall(stall_ctrl), .mul_stall(mul_stall));
 
     // PC Reg
-    register_neg pc_reg(.clock(clock), .input_enable(~stall_ctrl), .output_enable(1'b1), 
+    register_neg pc_reg(.clock(clock), .input_enable(~stall_ctrl | guitar_update), .output_enable(1'b1), 
         .clear(reset), .data(fd_pci), .data_out(pco));
+
+    // Guitar Hero Hardware
+    wire old_strum, new_strum, guitar_update, guitar_inc;
+    guitar guitar_ctrl(.old_strum(old_strum), .new_strum(new_strum), 
+        .buttons(buttons), .intersections(intersections), 
+        .update(guitar_update), .inc(guitar_inc));
+
+    dffe_neg new_s(.q(new_strum), .d(strum), .clk(gameclk), .en(1'b1), .clr(reset));
+    dffe_neg old_s(.q(old_strum), .d(new_strum), .clk(clock), .en(1'b1), .clr(reset));
+
+    // Mux in 2 commands and stall PC 2 cycles depending on update and inc
+    // Update reg: 32'b00101000010000000000000000000001
+    // Inc: 32'b00101000010000000000000000000010
+    // Dec: 32'b00101000010000000000000000000000
+
 
     // Fetch Stage
     assign address_imem = pco;
