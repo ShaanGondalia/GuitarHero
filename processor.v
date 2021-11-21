@@ -120,7 +120,7 @@ module processor(
     stall s_ctrl(.fd_ir(fd_ir), .dx_ir(dx_ir), .xm_ir(xm_ir), .stall(stall_ctrl), .mul_stall(mul_stall));
 
     // PC Reg
-    register_neg pc_reg(.clock(clock), .input_enable(~stall_ctrl | guitar_update), .output_enable(1'b1), 
+    register_neg pc_reg(.clock(clock), .input_enable(~stall_ctrl & ~w0 & ~w1), .output_enable(1'b1), 
         .clear(reset), .data(fd_pci), .data_out(pco));
 
     // Guitar Hero Hardware
@@ -134,8 +134,31 @@ module processor(
 
     // Mux in 2 commands and stall PC 2 cycles depending on update and inc
     // Update reg: 32'b00101000010000000000000000000001
-    // Inc: 32'b00101000010000000000000000000010
-    // Dec: 32'b00101000010000000000000000000000
+    // Inc: 32'b00101000100000000000000000000010
+    // Dec: 32'b00101000100000000000000000000000
+
+    wire inc;
+    assign inc_or_dec_ir = inc ? 32'b00101000100000000000000000000010 : 32'b00101000100000000000000000000000;
+    wire [31:0] guitar_fd_ir, inc_or_dec_ir;
+    mux_4 guitar_inst(.out(guitar_fd_ir), .select({w1, w0}), 
+        .in0(fd_ir_in), // Normal Code
+        .in1(inc_or_dec_ir), // INC
+        .in2(32'b00101000010000000000000000000001), // Update Reg
+        .in3(32'b0));
+
+    // FSM for stalls
+
+    wire out2, out1, out0;
+    wire in0 = (~out2 & ~out1 & ~out0 & guitar_update) | (~out2 & out1 & ~out0) | (out2 & ~out1 & ~out0);
+    wire in1 = (~out2 & ~out1 & out0) | (~out2 & out1 & ~out0);
+    wire in2 = (out2 & ~out1 & ~out0) | (~out2 & out1 & out0);
+    wire w1 = out2 | out1;
+    wire w0 = (~out2 & out0) | out2;
+
+    dffe_neg y0(.q(out0), .d(in0), .clk(clock), .en(1'b1), .clr(reset));
+    dffe_neg y1(.q(out1), .d(in1), .clk(clock), .en(1'b1), .clr(reset));
+    dffe_neg y2(.q(out2), .d(in2), .clk(clock), .en(1'b1), .clr(reset));
+    dffe_neg iord(.q(inc), .d(guitar_inc), .clk(clock), .en(1'b1), .clr(reset));
 
 
     // Fetch Stage
@@ -147,10 +170,10 @@ module processor(
     assign fd_ir_in = dp_branch ? 32'b0 : q_imem;
 
     // F/D Regs
-    register_neg fd_pc_reg(.clock(clock), .input_enable(~stall_ctrl), .output_enable(1'b1), 
+    register_neg fd_pc_reg(.clock(clock), .input_enable(~stall_ctrl & ~w0 & ~w1), .output_enable(1'b1), 
         .clear(reset), .data(fd_pci), .data_out(fd_pco));
     register_neg fd_ir_reg(.clock(clock), .input_enable(~stall_ctrl), .output_enable(1'b1), 
-        .clear(reset), .data(fd_ir_in), .data_out(fd_ir));
+        .clear(reset), .data(guitar_fd_ir), .data_out(fd_ir));
 
     // Decode Stage
     assign ctrl_writeReg = dp_wreg;
@@ -234,6 +257,6 @@ module processor(
 
     // Writeback Stage
     mux_4 writeback(.out(wb_data), .select(dp_wb), .in0(mw_o), .in1(mw_d), .in2(mult_res), .in3(mw_pco));
-    assign score = score_out ? wb_data : 32'b0;
+    assign score = guitar_score ? wb_data : 32'b1;
 
 endmodule

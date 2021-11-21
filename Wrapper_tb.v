@@ -40,7 +40,7 @@ module Wrapper_tb #(parameter FILE = "guitar_hero");
 	localparam MEM_DIR = "Memory Files/";
 	localparam OUT_DIR = "Output Files/";
 	localparam VERIF_DIR = "Verification Files/";
-	localparam DEFAULT_CYCLES = 255;
+	localparam DEFAULT_CYCLES = 511;
 
 	// Inputs to the processor
 	reg clock = 0, reset = 0, gameclk = 0, strum = 0;
@@ -57,7 +57,7 @@ module Wrapper_tb #(parameter FILE = "guitar_hero");
 	// Wires for Test Harness
 	wire[4:0] rs1_test, rs1_in;
 	reg testMode = 0; 
-	reg[7:0] num_cycles = DEFAULT_CYCLES;
+	reg[8:0] num_cycles = DEFAULT_CYCLES;
 	reg[15*8:0] exp_text;
 	reg null;
 
@@ -125,7 +125,13 @@ module Wrapper_tb #(parameter FILE = "guitar_hero");
 
 	// Create the clock
 	always
-		#10 clock = ~clock; 
+		#10 clock = ~clock;
+	always
+		#80 gameclk = ~gameclk;
+	always
+		#320 strum = ~strum;
+	always
+		#1280 intersections[0] = ~intersections[0];
 
 	//////////////////
 	// Test Harness //

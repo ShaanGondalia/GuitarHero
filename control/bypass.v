@@ -44,6 +44,7 @@ module bypass(dx_ir, xm_ir, mw_ir, alu_in_a, alu_in_b, dmem_in);
 
 	assign dx_rs = dx_jr ? dx_ir[26:22] : 5'bz;
 	assign dx_rs = dx_bex ? 5'b11110 : 5'bz;
+	assign dx_rs = ~(dx_jr | dx_bex | dx_itype_branch | dx_rtype | dx_itype_nonbranch) ? 5'b0 : 5'bz;
 
 	assign alu_in_a[0] = (xm_rd == dx_rs & ~(xm_sw | xm_bne | xm_blt) & (xm_rd != 5'b0));
 	assign alu_in_a[1] = mw_rd == dx_rs & ~(mw_sw | mw_bne | mw_blt) & (mw_rd != 5'b0) & ~alu_in_a[0];
@@ -55,6 +56,7 @@ module bypass(dx_ir, xm_ir, mw_ir, alu_in_a, alu_in_b, dmem_in);
 	assign dx_rt = (dx_rtype) ? dx_ir[16:12] : 5'bz;
 	assign dx_rt = (dx_itype_nonbranch) ? dx_ir[26:22] : 5'bz;
 	assign dx_rt = (dx_itype_branch) ? dx_ir[21:17] : 5'bz;
+	assign dx_rt = ~(dx_itype_branch | dx_itype_nonbranch | dx_rtype) ? 5'b0 : 5'bz;
 
 	assign alu_in_b[0] = (xm_rd == dx_rt & ~(xm_sw | xm_bne | xm_blt) & (xm_rd != 5'b0));
 	assign alu_in_b[1] = mw_rd == dx_rt & ~(mw_sw | mw_bne | mw_blt) & (mw_rd != 5'b0) & ~alu_in_b[0];

@@ -2,10 +2,87 @@ Cycle   9: Wrote 1 into register 29
 Cycle  10: Wrote 0 into register 28
 Cycle  11: Wrote 0 into register 1
 Cycle  12: Wrote 1 into register 2
+Cycle  21: Wrote 2 into register 2
+Cycle  22: Wrote 1 into register 1
+Cycle  36: Wrote 100 into register 28
+Cycle  40: Wrote 0 into register 1
+Cycle  41: Wrote 1 into register 2
+Cycle  53: Wrote 2 into register 2
+Cycle  54: Wrote 1 into register 1
+Cycle  68: Wrote 200 into register 28
+Cycle  72: Wrote 0 into register 1
+Cycle  73: Wrote 1 into register 2
+Cycle  85: Wrote 0 into register 2
+Cycle  86: Wrote 1 into register 1
+Cycle 100: Wrote 100 into register 28
+Cycle 104: Wrote 0 into register 1
+Cycle 105: Wrote 1 into register 2
+Cycle 117: Wrote 0 into register 2
+Cycle 118: Wrote 1 into register 1
+Cycle 132: Wrote 0 into register 28
+Cycle 136: Wrote 0 into register 1
+Cycle 137: Wrote 1 into register 2
+Cycle 149: Wrote 2 into register 2
+Cycle 150: Wrote 1 into register 1
+Cycle 164: Wrote 100 into register 28
+Cycle 168: Wrote 0 into register 1
+Cycle 169: Wrote 1 into register 2
+Cycle 181: Wrote 2 into register 2
+Cycle 182: Wrote 1 into register 1
+Cycle 196: Wrote 200 into register 28
+Cycle 200: Wrote 0 into register 1
+Cycle 201: Wrote 1 into register 2
+Cycle 213: Wrote 0 into register 2
+Cycle 214: Wrote 1 into register 1
+Cycle 228: Wrote 100 into register 28
+Cycle 232: Wrote 0 into register 1
+Cycle 233: Wrote 1 into register 2
+Cycle 245: Wrote 0 into register 2
+Cycle 246: Wrote 1 into register 1
+Cycle 260: Wrote 0 into register 28
+Cycle 264: Wrote 0 into register 1
+Cycle 265: Wrote 1 into register 2
+Cycle 277: Wrote 2 into register 2
+Cycle 278: Wrote 1 into register 1
+Cycle 292: Wrote 100 into register 28
+Cycle 296: Wrote 0 into register 1
+Cycle 297: Wrote 1 into register 2
+Cycle 309: Wrote 2 into register 2
+Cycle 310: Wrote 1 into register 1
+Cycle 324: Wrote 200 into register 28
+Cycle 328: Wrote 0 into register 1
+Cycle 329: Wrote 1 into register 2
+Cycle 341: Wrote 0 into register 2
+Cycle 342: Wrote 1 into register 1
+Cycle 356: Wrote 100 into register 28
+Cycle 360: Wrote 0 into register 1
+Cycle 361: Wrote 1 into register 2
+Cycle 373: Wrote 0 into register 2
+Cycle 374: Wrote 1 into register 1
+Cycle 388: Wrote 0 into register 28
+Cycle 392: Wrote 0 into register 1
+Cycle 393: Wrote 1 into register 2
+Cycle 405: Wrote 2 into register 2
+Cycle 406: Wrote 1 into register 1
+Cycle 420: Wrote 100 into register 28
+Cycle 424: Wrote 0 into register 1
+Cycle 425: Wrote 1 into register 2
+Cycle 437: Wrote 2 into register 2
+Cycle 438: Wrote 1 into register 1
+Cycle 452: Wrote 200 into register 28
+Cycle 456: Wrote 0 into register 1
+Cycle 457: Wrote 1 into register 2
+Cycle 469: Wrote 0 into register 2
+Cycle 470: Wrote 1 into register 1
+Cycle 484: Wrote 100 into register 28
+Cycle 488: Wrote 0 into register 1
+Cycle 489: Wrote 1 into register 2
+Cycle 501: Wrote 0 into register 2
+Cycle 502: Wrote 1 into register 1
 ============== Testing Mode ==============
 Reg  0:           0
-Reg  1:           0
-Reg  2:           1
+Reg  1:           1
+Reg  2:           0
 Reg  3:           0
 Reg  4:           0
 Reg  5:           0
@@ -31,7 +108,7 @@ Reg 24:           0
 Reg 25:           0
 Reg 26:           0
 Reg 27:           0
-Reg 28:           0
+Reg 28:         100
 Reg 29:           1
 Reg 30:           0
 Reg 31:           0

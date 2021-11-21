@@ -5,6 +5,7 @@ module guitar(mw_ir, old_strum, new_strum, buttons, intersections, update, inc, 
 
 	output update;
 	output inc;
+	output score_out;
 
 	assign c0 = (buttons[0] ~^ intersections[0]);
 	assign c1 = (buttons[1] ~^ intersections[1]);
@@ -14,6 +15,6 @@ module guitar(mw_ir, old_strum, new_strum, buttons, intersections, update, inc, 
 	assign inc = c0 & c1 & c2 & c3; // 1 if all presses are correct, 0 else
 	assign update = new_strum & (~old_strum); // Update if new = 1 and old = 0
 	// Output score IFF rd is r28
-	assign score_out = mw_ir[26] & mw_ir[25] & mw_ir[24] & ~mw_ir[23] & ~mw_ir[22]; 
+	assign score_out = mw_ir[26] & mw_ir[25] & mw_ir[24] & ~mw_ir[23] & ~mw_ir[22];
 
 endmodule
