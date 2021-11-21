@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-verilog -o f_custom_tb.vvp -s custom_tb custom_tb.v
+iverilog -o f_custom_tb.vvp -s custom_tb custom_tb.v
 vvp f_custom_tb.vvp
