@@ -6,6 +6,7 @@ module VGAController(
 	input move_down,
 	input move_right,
 	input move_left,
+	output debug1,
 	output hSync, 		// H Sync Signal
 	output vSync, 		// Veritcal Sync Signal
 	output[3:0] VGA_R,  // Red Signal Bits
@@ -15,7 +16,7 @@ module VGAController(
 	inout ps2_data);
 	
 	// Lab Memory Files Location
-	localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/lab5_ece350/Lab5/";
+	localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/guitar_hero/GuitarHero/PS2Interface/";
 
 	// Clock divider 100 MHz -> 25 MHz
 	wire clk25; // 25MHz clock
@@ -23,6 +24,7 @@ module VGAController(
 	reg[1:0] pixCounter = 0;      // Pixel counter to divide the clock
     assign clk25 = pixCounter[1]; // Set the clock high whenever the second bit (2) is high
 	always @(posedge clk) begin
+	    $display("Felix\n\n\n\n\n--------------------------");
 		pixCounter <= pixCounter + 1; // Since the reg is only 3 bits, it will reset every 8 cycles
 	end
 
@@ -105,41 +107,184 @@ module VGAController(
 	   index = switches; // assign 4 bits to an integer
 	   CounterLimit <= SYSTEM_FREQ / (2 * FREQs[index]) - 1;
     */
-	
-	
-	
-	// top left of square x and y, and then square width
-	reg[9:0] xtl = VIDEO_WIDTH / 2;
-	reg[8:0] ytl = VIDEO_HEIGHT / 2;
-	reg[6:0] width = 100;
-	// square color is 12'b111100000000; red is f, green and blue are 0
 
-    always @(posedge screenEnd) begin
-        ytl = move_up ? ytl - 1 : ytl;
-        ytl = move_down ? ytl + 1 : ytl;
-        xtl = move_left ? xtl - 1 : xtl;
-        xtl = move_right ? xtl + 1 : xtl;
-        if (ytl < 2)
-            ytl = 2;
-        if (xtl < 2)
-            xtl = 2;
-        if (ytl + width > VIDEO_HEIGHT)
-            ytl = VIDEO_HEIGHT - width;
-        if (xtl + width > VIDEO_WIDTH)
-            xtl = VIDEO_WIDTH - width;   
-    end
+	// screen clock: how often to move pieces (25MHz clock is for VGATimingGenerator, not this clock)
+	reg screen_clock = 0; // 60 Hz clock
+	reg[26:0] screen_counter = 0;
+	reg[26:0] screen_limit = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
+
+	// new notes clock: how often we check for a new note
+	reg new_notes_clock = 0; // .5 Hz clock (new notes come on once every 2 seconds)
+	reg[26:0] new_notes_counter = 0;
+	reg[26:0] new_notes_limit = 49999999; // 100 MHz -> 0.5 Hz need counter limit = 100 000 000 / (2 * 0.5) - 1
+
+	// clock divider
+	always @(posedge clk) begin
+	    $display("HELLO\n\n\n\n\n--------------------------");
+		if(new_notes_counter < new_notes_limit)
+	       new_notes_counter <= new_notes_counter + 1;
+	   	else begin
+	       new_notes_counter <= 0;
+	       new_notes_clock <= ~new_notes_clock;
+		end
+
+		if(screen_counter < screen_limit)
+	       screen_counter <= screen_counter + 1;
+	   	else begin
+	       screen_counter <= 0;
+	       screen_clock <= ~screen_clock;
+	   	end
+	end
+
+	reg[3:0] NOTES[0:20];
+	localparam MAX_NOTES_ON_SCREEN = 4;
+	reg[11:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
+	reg[11:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[11:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[11:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
+	initial begin
+	    $display("HELLO\n\n\n\n\n--------------------------");
+		$readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+		// stores the notes we will load, in 4 bit code where a bit being high means that bar has a note
+		// mem file uses hex it seems like
+		NOTE_POS1[0] = 0;
+		NOTE_POS2[0] = 0;
+		NOTE_POS3[0] = 0;
+		NOTE_POS4[0] = 0;
+	end
+	
+
+	reg NOTE_SPEED = 1;
+	reg[9:0] NOTE_1_X = 170;
+	reg[9:0] NOTE_2_X = 270;
+	reg[9:0] NOTE_3_X = 370;
+	reg[9:0] NOTE_4_X = 470;
+	reg[6:0] NOTE_WIDTH = 50;
+
+    reg debug1 = 1;
+	integer new_notes_index = 0; // index into NOTES, only increases
+	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
+//	always @(posedge new_notes_clock) begin
+//		if(NOTES[new_notes_index][3] == 0) begin
+//			NOTE_POS1[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
+//		end else begin
+//			NOTE_POS1[curr_notes_index] = 0;
+//		end
+//		if(NOTES[new_notes_index][2] == 0) begin
+//			NOTE_POS2[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
+//		end else begin
+//			NOTE_POS2[curr_notes_index] = 0;
+//		end
+//		if(NOTES[new_notes_index][1] == 0) begin
+//			NOTE_POS3[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
+//		end else begin
+//			NOTE_POS3[curr_notes_index] = 0;
+//		end
+//		if(NOTES[new_notes_index][0] == 0) begin
+//			NOTE_POS4[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
+//		end else begin
+//			NOTE_POS4[curr_notes_index] = 0;
+//		end
+//		new_notes_index = new_notes_index + 1;
+//		curr_notes_index = (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
+//	end
+
+	// move notes
+	always @(posedge screen_clock) begin
+	    debug1 = ~debug1;
+		NOTE_POS1[0] = NOTE_POS1[0] + NOTE_SPEED;
+        NOTE_POS1[1] = NOTE_POS1[1] + NOTE_SPEED;
+        NOTE_POS1[2] = NOTE_POS1[2] + NOTE_SPEED;
+        NOTE_POS1[3] = NOTE_POS1[3] + NOTE_SPEED;
+//        NOTE_POS1[4] = NOTE_POS1[4] + NOTE_SPEED;
+//        NOTE_POS1[5] = NOTE_POS1[5] + NOTE_SPEED;
+//        NOTE_POS1[6] = NOTE_POS1[6] + NOTE_SPEED;
+//        NOTE_POS1[7] = NOTE_POS1[7] + NOTE_SPEED;
+        
+        NOTE_POS2[0] = NOTE_POS2[0] + NOTE_SPEED;
+        NOTE_POS2[1] = NOTE_POS2[1] + NOTE_SPEED;
+        NOTE_POS2[2] = NOTE_POS2[2] + NOTE_SPEED;
+        NOTE_POS2[3] = NOTE_POS2[3] + NOTE_SPEED;
+//        NOTE_POS2[4] = NOTE_POS2[4] + NOTE_SPEED;
+//        NOTE_POS2[5] = NOTE_POS2[5] + NOTE_SPEED;
+//        NOTE_POS2[6] = NOTE_POS2[6] + NOTE_SPEED;
+//        NOTE_POS2[7] = NOTE_POS2[7] + NOTE_SPEED;
+        
+        NOTE_POS3[0] = NOTE_POS3[0] + NOTE_SPEED;
+        NOTE_POS3[1] = NOTE_POS3[1] + NOTE_SPEED;
+        NOTE_POS3[2] = NOTE_POS3[2] + NOTE_SPEED;
+        NOTE_POS3[3] = NOTE_POS3[3] + NOTE_SPEED;
+//        NOTE_POS3[4] = NOTE_POS3[4] + NOTE_SPEED;
+//        NOTE_POS3[5] = NOTE_POS3[5] + NOTE_SPEED;
+//        NOTE_POS3[6] = NOTE_POS3[6] + NOTE_SPEED;
+//        NOTE_POS3[7] = NOTE_POS3[7] + NOTE_SPEED;
+        
+        NOTE_POS4[0] = NOTE_POS4[0] + NOTE_SPEED;
+        NOTE_POS4[1] = NOTE_POS4[1] + NOTE_SPEED;
+        NOTE_POS4[2] = NOTE_POS4[2] + NOTE_SPEED;
+        NOTE_POS4[3] = NOTE_POS4[3] + NOTE_SPEED;
+//        NOTE_POS4[4] = NOTE_POS4[4] + NOTE_SPEED;
+//        NOTE_POS4[5] = NOTE_POS4[5] + NOTE_SPEED;
+//        NOTE_POS4[6] = NOTE_POS4[6] + NOTE_SPEED;
+//        NOTE_POS4[7] = NOTE_POS4[7] + NOTE_SPEED;
+	end
+
+	// top left of square x and y, and then square width
+//	reg[9:0] xtl = VIDEO_WIDTH / 2;
+//	reg[8:0] ytl = VIDEO_HEIGHT / 2;
+//	reg[6:0] width = 100;
+	// square color is 12'b111100000000; red is f, green and blue are 0
+//    always @(posedge screenEnd) begin
+//         ytl = move_up ? ytl - 1 : ytl;
+//         ytl = move_down ? ytl + 1 : ytl;
+//         xtl = move_left ? xtl - 1 : xtl;
+//         xtl = move_right ? xtl + 1 : xtl;
+//         if (ytl < 2)
+//             ytl = 2;
+//         if (xtl < 2)
+//             xtl = 2;
+//         if (ytl + width > VIDEO_HEIGHT)
+//             ytl = VIDEO_HEIGHT - width;
+//         if (xtl + width > VIDEO_WIDTH)
+//             xtl = VIDEO_WIDTH - width;
+//    end
     
-    wire top, left, right, bottom;
-    assign top = y > ytl;
-    assign left = x > xtl;
-    assign right = x < xtl + width;
-    assign bottom = y < ytl + width;
+    wire color1, color2, color3, color4;
     
-    wire inSquare;
-    and(inSquare, top, left, right, bottom);
+	wire inNote11, inNote12, inNote13, inNote14;
+	// can genvar to check all notes in each row, since they should be the same color
+    check_bounds note11(inNote11, NOTE_1_X, NOTE_POS1[0], NOTE_WIDTH, x, y);
+    check_bounds note12(inNote12, NOTE_1_X, NOTE_POS1[1], NOTE_WIDTH, x, y);
+    check_bounds note13(inNote13, NOTE_1_X, NOTE_POS1[2], NOTE_WIDTH, x, y);
+    check_bounds note14(inNote14, NOTE_1_X, NOTE_POS1[3], NOTE_WIDTH, x, y);
+    or(color1, inNote11, inNote12, inNote13, inNote14);
+    
+    wire inNote21, inNote22, inNote23, inNote24;
+    check_bounds note21(inNote21, NOTE_2_X, NOTE_POS2[0], NOTE_WIDTH, x, y);
+    check_bounds note22(inNote22, NOTE_2_X, NOTE_POS2[1], NOTE_WIDTH, x, y);
+    check_bounds note23(inNote23, NOTE_2_X, NOTE_POS2[2], NOTE_WIDTH, x, y);
+    check_bounds note24(inNote24, NOTE_2_X, NOTE_POS2[3], NOTE_WIDTH, x, y);
+    or(color2, inNote21, inNote22, inNote23, inNote24);
+    
+    wire inNote31, inNote32, inNote33, inNote34;
+    check_bounds note31(inNote31, NOTE_3_X, NOTE_POS3[0], NOTE_WIDTH, x, y);
+    check_bounds note32(inNote32, NOTE_3_X, NOTE_POS3[1], NOTE_WIDTH, x, y);
+    check_bounds note33(inNote33, NOTE_3_X, NOTE_POS3[2], NOTE_WIDTH, x, y);
+    check_bounds note34(inNote34, NOTE_3_X, NOTE_POS3[3], NOTE_WIDTH, x, y);
+    or(color3, inNote31, inNote32, inNote33, inNote34);
+    
+    wire inNote41, inNote42, inNote43, inNote44;
+    check_bounds note41(inNote41, NOTE_4_X, NOTE_POS4[0], NOTE_WIDTH, x, y);
+    check_bounds note42(inNote42, NOTE_4_X, NOTE_POS4[1], NOTE_WIDTH, x, y);
+    check_bounds note43(inNote43, NOTE_4_X, NOTE_POS4[2], NOTE_WIDTH, x, y);
+    check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
+    or(color4, inNote41, inNote42, inNote43, inNote44);
+
+
+    
 
     wire [11:0] felixColor;
-    assign felixColor = inSquare ? 12'b111100000000 : colorData;
+    assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : colorData)));
 
 	// Assign to output color from register if active
 	wire[BITS_PER_COLOR-1:0] colorOut; 			  // Output color 
