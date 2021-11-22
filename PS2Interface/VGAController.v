@@ -138,10 +138,10 @@ module VGAController(
 
 	reg[3:0] NOTES[0:20];
 	localparam MAX_NOTES_ON_SCREEN = 4;
-	reg[11:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
-	reg[11:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[11:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[11:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[20:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
+	reg[20:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[20:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[20:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	initial begin
 	    $display("HELLO\n\n\n\n\n--------------------------");
 		$readmemh({FILES_PATH, "Notes.mem"}, NOTES);
@@ -189,44 +189,16 @@ module VGAController(
 //		curr_notes_index = (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
 //	end
 
+	integer imove;
 	// move notes
 	always @(posedge screen_clock) begin
 	    debug1 = ~debug1;
-		NOTE_POS1[0] = NOTE_POS1[0] + NOTE_SPEED;
-        NOTE_POS1[1] = NOTE_POS1[1] + NOTE_SPEED;
-        NOTE_POS1[2] = NOTE_POS1[2] + NOTE_SPEED;
-        NOTE_POS1[3] = NOTE_POS1[3] + NOTE_SPEED;
-//        NOTE_POS1[4] = NOTE_POS1[4] + NOTE_SPEED;
-//        NOTE_POS1[5] = NOTE_POS1[5] + NOTE_SPEED;
-//        NOTE_POS1[6] = NOTE_POS1[6] + NOTE_SPEED;
-//        NOTE_POS1[7] = NOTE_POS1[7] + NOTE_SPEED;
-        
-        NOTE_POS2[0] = NOTE_POS2[0] + NOTE_SPEED;
-        NOTE_POS2[1] = NOTE_POS2[1] + NOTE_SPEED;
-        NOTE_POS2[2] = NOTE_POS2[2] + NOTE_SPEED;
-        NOTE_POS2[3] = NOTE_POS2[3] + NOTE_SPEED;
-//        NOTE_POS2[4] = NOTE_POS2[4] + NOTE_SPEED;
-//        NOTE_POS2[5] = NOTE_POS2[5] + NOTE_SPEED;
-//        NOTE_POS2[6] = NOTE_POS2[6] + NOTE_SPEED;
-//        NOTE_POS2[7] = NOTE_POS2[7] + NOTE_SPEED;
-        
-        NOTE_POS3[0] = NOTE_POS3[0] + NOTE_SPEED;
-        NOTE_POS3[1] = NOTE_POS3[1] + NOTE_SPEED;
-        NOTE_POS3[2] = NOTE_POS3[2] + NOTE_SPEED;
-        NOTE_POS3[3] = NOTE_POS3[3] + NOTE_SPEED;
-//        NOTE_POS3[4] = NOTE_POS3[4] + NOTE_SPEED;
-//        NOTE_POS3[5] = NOTE_POS3[5] + NOTE_SPEED;
-//        NOTE_POS3[6] = NOTE_POS3[6] + NOTE_SPEED;
-//        NOTE_POS3[7] = NOTE_POS3[7] + NOTE_SPEED;
-        
-        NOTE_POS4[0] = NOTE_POS4[0] + NOTE_SPEED;
-        NOTE_POS4[1] = NOTE_POS4[1] + NOTE_SPEED;
-        NOTE_POS4[2] = NOTE_POS4[2] + NOTE_SPEED;
-        NOTE_POS4[3] = NOTE_POS4[3] + NOTE_SPEED;
-//        NOTE_POS4[4] = NOTE_POS4[4] + NOTE_SPEED;
-//        NOTE_POS4[5] = NOTE_POS4[5] + NOTE_SPEED;
-//        NOTE_POS4[6] = NOTE_POS4[6] + NOTE_SPEED;
-//        NOTE_POS4[7] = NOTE_POS4[7] + NOTE_SPEED;
+		for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove++) begin
+			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
+			NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
+			NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
+			NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
+		end
 	end
 
 	// top left of square x and y, and then square width
@@ -248,40 +220,61 @@ module VGAController(
 //         if (xtl + width > VIDEO_WIDTH)
 //             xtl = VIDEO_WIDTH - width;
 //    end
+
+
+	// gen var would create this
+    // dffe_ref reg0(out[0], in[0], clk, in_en, clr);
+    // ...
+    // dffe_ref reg31(out[31], in[31], clk, in_en, clr);
+
+
+	wire [MAX_NOTES_ON_SCREEN-1:0] inNote1, inNote2, inNote3, inNote4; // each bit is high if current x and y are in the note in NOTE_POS
+    genvar g;
+    generate
+        for (g = 0; g < MAX_NOTES_ON_SCREEN; g++) begin: loop1
+			check_bounds note1(inNote1[g], NOTE_1_X, NOTE_POS1[g], NOTE_WIDTH, x, y);
+			check_bounds note2(inNote2[g], NOTE_2_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
+			check_bounds note3(inNote3[g], NOTE_3_X, NOTE_POS3[g], NOTE_WIDTH, x, y);
+			check_bounds note4(inNote4[g], NOTE_4_X, NOTE_POS4[g], NOTE_WIDTH, x, y);
+        end
+    endgenerate
     
     wire color1, color2, color3, color4;
+	assign color1 =|inNote1; // reduction operator OR
+	assign color2 =|inNote2;
+	assign color3 =|inNote3;
+	assign color4 =|inNote4;
     
-	wire inNote11, inNote12, inNote13, inNote14;
-	// can genvar to check all notes in each row, since they should be the same color
-    check_bounds note11(inNote11, NOTE_1_X, NOTE_POS1[0], NOTE_WIDTH, x, y);
-    check_bounds note12(inNote12, NOTE_1_X, NOTE_POS1[1], NOTE_WIDTH, x, y);
-    check_bounds note13(inNote13, NOTE_1_X, NOTE_POS1[2], NOTE_WIDTH, x, y);
-    check_bounds note14(inNote14, NOTE_1_X, NOTE_POS1[3], NOTE_WIDTH, x, y);
-    or(color1, inNote11, inNote12, inNote13, inNote14);
+	// wire inNote11, inNote12, inNote13, inNote14;
+	// // can genvar to check all notes in each row, since they should be the same color
+    // check_bounds note11(inNote11, NOTE_1_X, NOTE_POS1[0], NOTE_WIDTH, x, y);
+    // check_bounds note12(inNote12, NOTE_1_X, NOTE_POS1[1], NOTE_WIDTH, x, y);
+    // check_bounds note13(inNote13, NOTE_1_X, NOTE_POS1[2], NOTE_WIDTH, x, y);
+    // check_bounds note14(inNote14, NOTE_1_X, NOTE_POS1[3], NOTE_WIDTH, x, y);
+    // or(color1, inNote11, inNote12, inNote13, inNote14);
     
-    wire inNote21, inNote22, inNote23, inNote24;
-    check_bounds note21(inNote21, NOTE_2_X, NOTE_POS2[0], NOTE_WIDTH, x, y);
-    check_bounds note22(inNote22, NOTE_2_X, NOTE_POS2[1], NOTE_WIDTH, x, y);
-    check_bounds note23(inNote23, NOTE_2_X, NOTE_POS2[2], NOTE_WIDTH, x, y);
-    check_bounds note24(inNote24, NOTE_2_X, NOTE_POS2[3], NOTE_WIDTH, x, y);
-    or(color2, inNote21, inNote22, inNote23, inNote24);
+    // wire inNote21, inNote22, inNote23, inNote24;
+    // check_bounds note21(inNote21, NOTE_2_X, NOTE_POS2[0], NOTE_WIDTH, x, y);
+    // check_bounds note22(inNote22, NOTE_2_X, NOTE_POS2[1], NOTE_WIDTH, x, y);
+    // check_bounds note23(inNote23, NOTE_2_X, NOTE_POS2[2], NOTE_WIDTH, x, y);
+    // check_bounds note24(inNote24, NOTE_2_X, NOTE_POS2[3], NOTE_WIDTH, x, y);
+    // or(color2, inNote21, inNote22, inNote23, inNote24);
     
-    wire inNote31, inNote32, inNote33, inNote34;
-    check_bounds note31(inNote31, NOTE_3_X, NOTE_POS3[0], NOTE_WIDTH, x, y);
-    check_bounds note32(inNote32, NOTE_3_X, NOTE_POS3[1], NOTE_WIDTH, x, y);
-    check_bounds note33(inNote33, NOTE_3_X, NOTE_POS3[2], NOTE_WIDTH, x, y);
-    check_bounds note34(inNote34, NOTE_3_X, NOTE_POS3[3], NOTE_WIDTH, x, y);
-    or(color3, inNote31, inNote32, inNote33, inNote34);
+    // wire inNote31, inNote32, inNote33, inNote34;
+    // check_bounds note31(inNote31, NOTE_3_X, NOTE_POS3[0], NOTE_WIDTH, x, y);
+    // check_bounds note32(inNote32, NOTE_3_X, NOTE_POS3[1], NOTE_WIDTH, x, y);
+    // check_bounds note33(inNote33, NOTE_3_X, NOTE_POS3[2], NOTE_WIDTH, x, y);
+    // check_bounds note34(inNote34, NOTE_3_X, NOTE_POS3[3], NOTE_WIDTH, x, y);
+    // or(color3, inNote31, inNote32, inNote33, inNote34);
     
-    wire inNote41, inNote42, inNote43, inNote44;
-    check_bounds note41(inNote41, NOTE_4_X, NOTE_POS4[0], NOTE_WIDTH, x, y);
-    check_bounds note42(inNote42, NOTE_4_X, NOTE_POS4[1], NOTE_WIDTH, x, y);
-    check_bounds note43(inNote43, NOTE_4_X, NOTE_POS4[2], NOTE_WIDTH, x, y);
-    check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
-    or(color4, inNote41, inNote42, inNote43, inNote44);
+    // wire inNote41, inNote42, inNote43, inNote44;
+    // check_bounds note41(inNote41, NOTE_4_X, NOTE_POS4[0], NOTE_WIDTH, x, y);
+    // check_bounds note42(inNote42, NOTE_4_X, NOTE_POS4[1], NOTE_WIDTH, x, y);
+    // check_bounds note43(inNote43, NOTE_4_X, NOTE_POS4[2], NOTE_WIDTH, x, y);
+    // check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
+    // or(color4, inNote41, inNote42, inNote43, inNote44);
 
 
-    
 
     wire [11:0] felixColor;
     assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : colorData)));
