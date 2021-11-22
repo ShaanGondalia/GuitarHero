@@ -1,4 +1,4 @@
-`timescale 1 ps / 100 fs
+`timescale 1 ns / 100 ps
 module custom_tb;
     wire [31:0] in0, in1, in2, in3, in4, in5, in6, in7;
 
@@ -27,7 +27,7 @@ module custom_tb;
     //
     ///////////////////
     
-    VGAController vga(clock, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1, t1, t2, t3, temp1[3:0], temp2[3:0], temp3[3:0], t4, t5, t6, t7);
+    // VGAController vga(clock, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1, t1, t2, t3, temp1[3:0], temp2[3:0], temp3[3:0], t4, t5, t6, t7);
     
 //    VGAController(input clk, 			// 100 MHz System Clock
 //	input reset, 		// Reset Signal
@@ -46,20 +46,40 @@ module custom_tb;
     localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/guitar_hero/GuitarHero/PS2Interface/";
     localparam MAX_NOTES_ON_SCREEN = 21;
     reg[3:0] NOTES[0:MAX_NOTES_ON_SCREEN - 1];
+    wire [MAX_NOTES_ON_SCREEN-1:0] felix;
+    assign felix = m0[MAX_NOTES_ON_SCREEN-1:0];
+    assign hi =|felix;
 
     initial begin
-        $display("Loading mem");
-        $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
-        #8000000
+        m0 = 2;
+        #20
+        $display("Loading mem %b", hi);
+        // $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+        $readmemh("Notes.mem", NOTES);
+        #80
         for(i = 0; i < 16; i = i + 1) begin
             #20;
-            $display("notes: %b", NOTES[i]);
+            $display("i: %d notes: %b", i, NOTES[i]);
             $display("1st bit: %b", NOTES[i][3]);
+            if(NOTES[i][3] == 0) begin
+                $display("zero %b", felix);
+            end else begin
+                $display("not zero %b", felix);
+            end
         end
+        // $display("FELIX: %b", NOTES[30]);
 		$finish;
 	end
 
+    always @(posedge clock) begin
+        $display("integer: %b", m0);
+        for(i = 0; i < MAX_NOTES_ON_SCREEN; i++) begin
+            m0[i] = ~m0[i];
+        end
+        $display("integer: %b", m0);
+    end
+
     always
-        #1 clock = !clock;
+        #40 clock = !clock;
 
 endmodule
