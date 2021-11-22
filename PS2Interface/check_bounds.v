@@ -1,6 +1,6 @@
 module check_bounds(inNote, note_x, note_y, note_width, curr_x, curr_y);
     // check if current x and y are within a note
-    input [32:0] note_y;
+    input [31:0] note_y;
     input [9:0] note_x, curr_x;
     input [8:0] curr_y;
     input [6:0] note_width;

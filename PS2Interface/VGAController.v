@@ -137,11 +137,11 @@ module VGAController(
 	end
 
 	// reg[3:0] NOTES[0:62];
-	localparam MAX_NOTES_ON_SCREEN = 30;
-	reg[32:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
-	reg[32:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[32:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[32:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
+	localparam MAX_NOTES_ON_SCREEN = 4;
+	reg[31:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
+	reg[31:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	reg maybe1, maybe2, maybe3, maybe4;
 	integer f, iinit;
 	initial begin
@@ -220,12 +220,14 @@ module VGAController(
 	// move notes
 	always @(posedge screen_clock) begin
 	    // vivado doesn't like i++
-		for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove = imove + 1) begin
-			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
-			NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
-			NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
-			NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
-		end
+		NOTE_POS1[0] = NOTE_POS1[0] + NOTE_SPEED;
+		NOTE_POS1[1] = NOTE_POS1[1] + NOTE_SPEED;
+		// for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove = imove + 1) begin
+		// 	NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
+		// 	NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
+		// 	NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
+		// 	NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
+		// end
 	end
 
 	// top left of square x and y, and then square width
