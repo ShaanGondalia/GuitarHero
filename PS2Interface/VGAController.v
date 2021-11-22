@@ -115,8 +115,8 @@ module VGAController(
 
 	// new notes clock: how often we check for a new note
 	reg new_notes_clock = 0; // .5 Hz clock (new notes come on once every 2 seconds)
-	reg[26:0] new_notes_counter = 0;
-	reg[26:0] new_notes_limit = 49999999; // 100 MHz -> 0.5 Hz need counter limit = 100 000 000 / (2 * 0.5) - 1
+	reg[32:0] new_notes_counter = 0;
+	reg[32:0] new_notes_limit = 49999999; // 100 MHz -> 0.5 Hz need counter limit = 100 000 000 / (2 * 0.5) - 1
 
 	// clock divider
 	always @(posedge clk) begin
@@ -136,21 +136,44 @@ module VGAController(
 	   	end
 	end
 
-	reg[3:0] NOTES[0:20];
-	localparam MAX_NOTES_ON_SCREEN = 4;
-	reg[20:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
-	reg[20:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[20:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
-	reg[20:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
+	// reg[3:0] NOTES[0:62];
+	localparam MAX_NOTES_ON_SCREEN = 30;
+	reg[32:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
+	reg[32:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[32:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
+	reg[32:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
+	reg maybe1, maybe2, maybe3, maybe4;
+	integer f, iinit;
 	initial begin
-	    $display("HELLO\n\n\n\n\n--------------------------");
-		$readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+	    f = $fopen({FILES_PATH, "felix.txt"},"w");
+		// $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
 		// stores the notes we will load, in 4 bit code where a bit being high means that bar has a note
 		// mem file uses hex it seems like
-		NOTE_POS1[0] = 0;
-		NOTE_POS2[0] = 0;
-		NOTE_POS3[0] = 0;
-		NOTE_POS4[0] = 0;
+        maybe1 = 1;
+        maybe2 = 1;
+        maybe3 = 1;
+        maybe4 = 1;
+        NOTE_POS1[0] = 32'd0;
+        NOTE_POS1[1] = 32'd100;
+        NOTE_POS1[2] = 32'd300;
+        NOTE_POS1[3] = 32'd400;
+        NOTE_POS2[2] = 50;
+        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
+//            maybe1 = $urandom%1;
+//            maybe2 = $urandom%1;
+//            maybe3 = $urandom%1;
+//            maybe4 = $urandom%1;
+
+//			NOTE_POS1[iinit] = maybe1 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+//			NOTE_POS2[iinit] = maybe2 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+//			NOTE_POS3[iinit] = maybe3 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+//			NOTE_POS4[iinit] = maybe4 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+		end
+		
+		@(negedge new_notes_clock);
+		#800
+		$fclose(f);
+        $finish;
 	end
 	
 
@@ -164,36 +187,40 @@ module VGAController(
     reg debug1 = 1;
 	integer new_notes_index = 0; // index into NOTES, only increases
 	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
-//	always @(posedge new_notes_clock) begin
+	always @(posedge new_notes_clock) begin
+	    $fwrite(f,"%b\n", new_notes_index);
+	    new_notes_index <= new_notes_index + 1;
+	    debug1 = ~debug1;
 //		if(NOTES[new_notes_index][3] == 0) begin
 //			NOTE_POS1[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
 //		end else begin
-//			NOTE_POS1[curr_notes_index] = 0;
+//			NOTE_POS1[curr_notes_index] = 30;
 //		end
 //		if(NOTES[new_notes_index][2] == 0) begin
 //			NOTE_POS2[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
 //		end else begin
-//			NOTE_POS2[curr_notes_index] = 0;
+//			NOTE_POS2[curr_notes_index] = 40;
 //		end
 //		if(NOTES[new_notes_index][1] == 0) begin
 //			NOTE_POS3[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
 //		end else begin
-//			NOTE_POS3[curr_notes_index] = 0;
+//			NOTE_POS3[curr_notes_index] = 50;
 //		end
 //		if(NOTES[new_notes_index][0] == 0) begin
 //			NOTE_POS4[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
 //		end else begin
-//			NOTE_POS4[curr_notes_index] = 0;
+//			NOTE_POS4[curr_notes_index] = 60;
 //		end
-//		new_notes_index = new_notes_index + 1;
-//		curr_notes_index = (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
-//	end
+//		new_notes_index <= new_notes_index + 1;
+//		// curr_notes_index <= (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
+//		curr_notes_index <= curr_notes_index + 1;
+	end
 
 	integer imove;
 	// move notes
 	always @(posedge screen_clock) begin
-	    debug1 = ~debug1;
-		for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove++) begin
+	    // vivado doesn't like i++
+		for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove = imove + 1) begin
 			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
 			NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
 			NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
@@ -222,16 +249,10 @@ module VGAController(
 //    end
 
 
-	// gen var would create this
-    // dffe_ref reg0(out[0], in[0], clk, in_en, clr);
-    // ...
-    // dffe_ref reg31(out[31], in[31], clk, in_en, clr);
-
-
 	wire [MAX_NOTES_ON_SCREEN-1:0] inNote1, inNote2, inNote3, inNote4; // each bit is high if current x and y are in the note in NOTE_POS
     genvar g;
     generate
-        for (g = 0; g < MAX_NOTES_ON_SCREEN; g++) begin: loop1
+        for (g = 0; g < MAX_NOTES_ON_SCREEN; g = g + 1) begin: loop1
 			check_bounds note1(inNote1[g], NOTE_1_X, NOTE_POS1[g], NOTE_WIDTH, x, y);
 			check_bounds note2(inNote2[g], NOTE_2_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
 			check_bounds note3(inNote3[g], NOTE_3_X, NOTE_POS3[g], NOTE_WIDTH, x, y);

@@ -48,4 +48,5 @@ set_property IOSTANDARD LVCMOS33 [get_ports move_left]
 set_property IOSTANDARD LVCMOS33 [get_ports move_right]
 set_property IOSTANDARD LVCMOS33 [get_ports move_up]
 
-
+set_property IOSTANDARD LVCMOS33 [get_ports debug1]
+set_property PACKAGE_PIN H17 [get_ports debug1]
