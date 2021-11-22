@@ -51,7 +51,12 @@ module custom_tb;
     assign hi =|felix;
     reg maybe;
 
+    integer imove;
     initial begin
+        for(imove = 0; imove < 40; imove++) begin
+			NOTE_POS1[imove] = 0;
+            NOTE_POS2[imove] = 32'd30;
+		end
         m0 = 2;
         $display("Loading mem %b", hi);
         // $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
@@ -70,17 +75,34 @@ module custom_tb;
                 $display("not zero %b", felix);
             end
         end
+        NOTE_POS1[5] = 32'b11111;
+        #2000
+        $display("final values");
+        for(imove = 0; imove < 40; imove++) begin
+            $display("NOTE_POS1 note at: %d %b", imove, NOTE_POS1[imove]);
+            $display("NOTE_POS2 note at: %d %b", imove, NOTE_POS2[imove]);
+		end
         // $display("FELIX: %b", NOTES[30]);
 		$finish;
 	end
 
+    reg[31:0] NOTE_POS1[0:39];
+    reg[31:0] NOTE_POS2[0:39];
+    reg NOTE_SPEED = 1;
     always @(posedge clock) begin
-        $display("integer: %b", m0);
-        for(i = 0; i < MAX_NOTES_ON_SCREEN; i = i + 1) begin
-            m0[i] = ~m0[i];
-        end
-        $display("integer: %b", m0);
-    end
+		for(imove = 0; imove < 40; imove++) begin
+			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
+            NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
+		end
+	end
+
+    // always @(posedge clock) begin
+    //     $display("integer: %b", m0);
+    //     for(i = 0; i < MAX_NOTES_ON_SCREEN; i = i + 1) begin
+    //         m0[i] = ~m0[i];
+    //     end
+    //     $display("integer: %b", m0);
+    // end
 
     always
         #40 clock = !clock;
