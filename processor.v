@@ -47,25 +47,25 @@ module processor(
     strum,
     gameclk,
     score
-	);
+    );
 
-	// Control signals
-	input clock, reset;
-	
-	// Imem
+    // Control signals
+    input clock, reset;
+    
+    // Imem
     output [31:0] address_imem;
-	input [31:0] q_imem;
+    input [31:0] q_imem;
 
-	// Dmem
-	output [31:0] address_dmem, data;
-	output wren;
-	input [31:0] q_dmem;
+    // Dmem
+    output [31:0] address_dmem, data;
+    output wren;
+    input [31:0] q_dmem;
 
-	// Regfile
-	output ctrl_writeEnable;
-	output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-	output [31:0] data_writeReg;
-	input [31:0] data_readRegA, data_readRegB;
+    // Regfile
+    output ctrl_writeEnable;
+    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    output [31:0] data_writeReg;
+    input [31:0] data_readRegA, data_readRegB;
 
     // Guitar Hero
     input [3:0] buttons;
@@ -147,7 +147,6 @@ module processor(
         .in3(32'b0));
 
     // FSM for stalls
-
     wire out2, out1, out0;
     wire [1:0] guitar_sel;
     wire in0 = (~out2 & ~out1 & ~out0 & guitar_update) | (~out2 & out1 & ~out0) | (out2 & ~out1 & ~out0);

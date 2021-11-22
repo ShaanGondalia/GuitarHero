@@ -27,15 +27,13 @@
 module Wrapper (clock, reset, gameclk, buttons, intersections, strum, score);
 	input clock, reset, gameclk, strum;
 	input [3:0] buttons, intersections;
-	output [31:0] score;
+	output reg [31:0] score;
 
 	wire rwe, mwe;
 	wire[4:0] rd, rs1, rs2;
 	wire[31:0] instAddr, instData, 
 		rData, regA, regB,
-		memAddr, memDataIn, memDataOut;
-
-
+		memAddr, memDataIn, memDataOut, procscore;
 
 	// ADD YOUR MEMORY FILE HERE
 	localparam INSTR_FILE = "guitar_hero";
@@ -60,7 +58,7 @@ module Wrapper (clock, reset, gameclk, buttons, intersections, strum, score);
 		.intersections(intersections),
 		.strum(strum),
 		.gameclk(gameclk),
-		.score(score)); 
+		.score(procscore)); 
 	
 	// Instruction Memory (ROM)
 	ROM #(.MEMFILE({INSTR_FILE, ".mem"}))
@@ -81,5 +79,10 @@ module Wrapper (clock, reset, gameclk, buttons, intersections, strum, score);
 		.addr(memAddr[11:0]), 
 		.dataIn(memDataIn), 
 		.dataOut(memDataOut));
+		
+	always @(posedge clock) begin
+		if(procscore != 32'b1)
+		  score <= procscore;
+	end
 
 endmodule
