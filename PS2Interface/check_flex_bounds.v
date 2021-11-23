@@ -1,4 +1,4 @@
-module check_bounds(inNote, note_x, note_y, note_width_x, note_width_y, curr_x, curr_y);
+module check_flex_bounds(inNote, note_x, note_y, note_width_x, note_width_y, curr_x, curr_y);
     // check if current x and y are within an object with width x and y
     input [31:0] note_y;
     input [9:0] note_x, curr_x;
