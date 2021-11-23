@@ -301,9 +301,16 @@ module VGAController(
     // check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
     // or(color4, inNote41, inNote42, inNote43, inNote44);
 
+	// draw line for notes to be played
+	reg [9:0] horLineX = 120;
+	reg [9:0] horLineY = 350;
+	reg [9:0] horLineWidthX = 400;
+	reg [9:0] horLineWidthY = 20;
+	wire horLine;
+	check_flex_bounds hor_line(horLine, horLineX, horLineY, horLineWidthX, horLineWidthY, x, y);
 
     wire [11:0] felixColor;
-    assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : colorData)));
+    assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : ( horLine ? 12'b111111110000 : colorData))));
 
 	// Assign to output color from register if active
 	wire[BITS_PER_COLOR-1:0] colorOut; 			  // Output color 
