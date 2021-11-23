@@ -53,7 +53,7 @@ module custom_tb;
 
     integer imove;
     initial begin
-        for(imove = 0; imove < 40; imove++) begin
+        for(imove = 0; imove < 40; imove = imove + 1) begin
 			NOTE_POS1[imove] = 0;
             NOTE_POS2[imove] = 32'd30;
 		end
@@ -78,7 +78,7 @@ module custom_tb;
         NOTE_POS1[5] = 32'b11111;
         #2000
         $display("final values");
-        for(imove = 0; imove < 40; imove++) begin
+        for(imove = 0; imove < 40; imove = imove + 1) begin
             $display("NOTE_POS1 note at: %d %b", imove, NOTE_POS1[imove]);
             $display("NOTE_POS2 note at: %d %b", imove, NOTE_POS2[imove]);
 		end
@@ -90,7 +90,7 @@ module custom_tb;
     reg[31:0] NOTE_POS2[0:39];
     reg NOTE_SPEED = 1;
     always @(posedge clock) begin
-		for(imove = 0; imove < 40; imove++) begin
+		for(imove = 0; imove < 40; imove = imove + 1) begin
 			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
             NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
 		end
