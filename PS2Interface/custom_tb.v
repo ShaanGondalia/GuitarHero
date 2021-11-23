@@ -49,52 +49,41 @@ module custom_tb;
     wire [MAX_NOTES_ON_SCREEN-1:0] felix;
     assign felix = m0[MAX_NOTES_ON_SCREEN-1:0];
     assign hi =|felix;
-    reg maybe;
+    reg[3:0] maybe;
 
     integer imove;
     initial begin
-        for(imove = 0; imove < 40; imove = imove + 1) begin
-			NOTE_POS1[imove] = 0;
-            NOTE_POS2[imove] = 32'd30;
-		end
-        m0 = 2;
+        m0 = 0;
+        #20
         $display("Loading mem %b", hi);
         // $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
         $readmemh("Notes.mem", NOTES);
         #10
         for(i = 0; i < 16; i = i + 1) begin
             #20;
-            maybe = $urandom%1;
-			m1 = maybe ? (-1 * i * 100) : (i * 100);
+            maybe = $urandom%2;
+			m1 = maybe ? (-1 * i * 64) : (i * 64);
 			$display("maybe: %b m1: %b", maybe, m1);
-            $display("i: %d notes: %b", i, NOTES[i]);
-            $display("1st bit: %b", NOTES[i][3]);
-            if(NOTES[i][3] == 0) begin
-                $display("zero %b", felix);
-            end else begin
-                $display("not zero %b", felix);
-            end
+            // $display("i: %d notes: %b", i, NOTES[i]);
+            // $display("1st bit: %b", NOTES[i][3]);
+            // if(NOTES[i][3] == 0) begin
+            //     $display("zero %b", felix);
+            // end else begin
+            //     $display("not zero %b", felix);
+            // end
         end
-        NOTE_POS1[5] = 32'b11111;
-        #2000
-        $display("final values");
-        for(imove = 0; imove < 40; imove = imove + 1) begin
-            $display("NOTE_POS1 note at: %d %b", imove, NOTE_POS1[imove]);
-            $display("NOTE_POS2 note at: %d %b", imove, NOTE_POS2[imove]);
-		end
-        // $display("FELIX: %b", NOTES[30]);
 		$finish;
 	end
 
-    reg[31:0] NOTE_POS1[0:39];
-    reg[31:0] NOTE_POS2[0:39];
-    reg NOTE_SPEED = 1;
-    always @(posedge clock) begin
-		for(imove = 0; imove < 40; imove = imove + 1) begin
-			NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
-            NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
-		end
-	end
+    // reg[31:0] NOTE_POS1[0:39];
+    // reg[31:0] NOTE_POS2[0:39];
+    // reg NOTE_SPEED = 1;
+    // always @(posedge clock) begin
+	// 	for(imove = 0; imove < 40; imove = imove + 1) begin
+	// 		NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
+    //         NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
+	// 	end
+	// end
 
     // always @(posedge clock) begin
     //     $display("integer: %b", m0);
