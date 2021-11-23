@@ -3,7 +3,7 @@ module check_bounds(inNote, note_x, note_y, note_width_x, note_width_y, curr_x, 
     input [31:0] note_y;
     input [9:0] note_x, curr_x;
     input [8:0] curr_y;
-    input [6:0] note_width;
+    input [6:0] note_width_x, note_width_y;
 
     output inNote; // high if x and y are within the object
 
