@@ -141,7 +141,6 @@ module VGAController(
 	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	
-    
 	reg[31:0] one;
 	reg[31:0] two;
 	reg maybe1, maybe2, maybe3, maybe4;
@@ -154,11 +153,13 @@ module VGAController(
 		// $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
 		// stores the notes we will load, in 4 bit code where a bit being high means that bar has a note
 		// mem file uses hex it seems like
-//        maybe1 = 1;
-//        maybe2 = 1;
-//        maybe3 = 1;
-//        maybe4 = 1;
-//        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
+        maybe1 = 1;
+        maybe2 = 1;
+        maybe3 = 1;
+        maybe4 = 1;
+        one = 32'd100;
+        two = 32'd250;
+        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
 //            maybe1 = $urandom%1;
 //            maybe2 = $urandom%1;
 //            maybe3 = $urandom%1;
