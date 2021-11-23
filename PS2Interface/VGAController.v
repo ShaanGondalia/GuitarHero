@@ -141,25 +141,32 @@ module VGAController(
 	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	
-	reg[31:0] one;
-	reg[31:0] two;
+//	reg[31:0] one = 100;
+//	reg[31:0] two = 200;
+	
 	reg maybe1, maybe2, maybe3, maybe4;
-	integer f, iinit;
+	integer iinit;
 	initial begin
-	   NOTE_POS1[0] = -100;
-	   NOTE_POS1[1] = 300;
 //	   one = 100;
 //	   two = 200;
+	   NOTE_POS1[0] = -100;
+	   NOTE_POS1[1] = 300;
+	   NOTE_POS2[0] = -200;
+	   NOTE_POS2[1] = 50;
+	   NOTE_POS3[0] = -100;
+	   NOTE_POS3[1] = 300;
+	   NOTE_POS4[0] = -200;
+	   NOTE_POS4[1] = 50;
 		// $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
 		// stores the notes we will load, in 4 bit code where a bit being high means that bar has a note
 		// mem file uses hex it seems like
-        maybe1 = 1;
-        maybe2 = 1;
-        maybe3 = 1;
-        maybe4 = 1;
-        one = 32'd100;
-        two = 32'd250;
-        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
+//        maybe1 = 1;
+//        maybe2 = 1;
+//        maybe3 = 1;
+//        maybe4 = 1;
+//        one = 32'd100;
+//        two = 32'd250;
+//        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
 //            maybe1 = $urandom%1;
 //            maybe2 = $urandom%1;
 //            maybe3 = $urandom%1;
@@ -173,8 +180,7 @@ module VGAController(
         $finish;
 	end
 	
-
-	reg NOTE_SPEED = 1;
+    reg NOTE_SPEED = 1;
 	reg[9:0] NOTE_1_X = 170;
 	reg[9:0] NOTE_2_X = 270;
 	reg[9:0] NOTE_3_X = 370;
@@ -185,7 +191,6 @@ module VGAController(
 	integer new_notes_index = 0; // index into NOTES, only increases
 	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
 	always @(posedge new_notes_clock) begin
-	    $fwrite(f,"%b\n", new_notes_index);
 	    new_notes_index <= new_notes_index + 1;
 	    debug1 = ~debug1;
 //		if(NOTES[new_notes_index][3] == 0) begin
@@ -217,13 +222,13 @@ module VGAController(
 	// move notes
 	always @(posedge screen_clock) begin
 	    // vivado doesn't like i++
-//		one = one + NOTE_SPEED;
-//		two = two + NOTE_SPEED;
+//	    one = one + NOTE_SPEED;
+//	    two = two + NOTE_SPEED;
 		 for(imove = 0; imove < MAX_NOTES_ON_SCREEN; imove = imove + 1) begin
 		 	NOTE_POS1[imove] = NOTE_POS1[imove] + NOTE_SPEED;
-//		 	NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
-//		 	NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
-//		 	NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
+		 	NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
+		 	NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
+		 	NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
 		 end
 	end
 	
@@ -254,9 +259,9 @@ module VGAController(
     generate
         for (g = 0; g < MAX_NOTES_ON_SCREEN; g = g + 1) begin: loop1
 			check_bounds note1(inNote1[g], NOTE_1_X, NOTE_POS1[g], NOTE_WIDTH, x, y);
-//			check_bounds note2(inNote2[g], NOTE_1_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
-//			check_bounds note3(inNote3[g], NOTE_1_X, NOTE_POS3[g], NOTE_WIDTH, x, y);
-//			check_bounds note4(inNote4[g], NOTE_1_X, NOTE_POS4[g], NOTE_WIDTH, x, y);
+			check_bounds note2(inNote2[g], NOTE_2_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
+			check_bounds note3(inNote3[g], NOTE_3_X, NOTE_POS3[g], NOTE_WIDTH, x, y);
+			check_bounds note4(inNote4[g], NOTE_4_X, NOTE_POS4[g], NOTE_WIDTH, x, y);
         end
     endgenerate
 //    wire t1, t2;
@@ -264,14 +269,15 @@ module VGAController(
 //    check_bounds note2(t2, NOTE_1_X, two, NOTE_WIDTH, x, y);
     
     wire color1, color2, color3, color4;
+//    or(color1, inNote1[0], inNote1[1]);
 	assign color1 =|inNote1; // reduction operator OR
-//	assign color2 =|inNote2;
-//	assign color3 =|inNote3;
-//	assign color4 =|inNote4;
+	assign color2 =|inNote2;
+	assign color3 =|inNote3;
+	assign color4 =|inNote4;
 //    or(color1, t1, t2);
-    assign color2 = 1'b0;
-    assign color3 = 1'b0;
-    assign color4 = 1'b0;
+//    assign color2 = 1'b0;
+//    assign color3 = 1'b0;
+//    assign color4 = 1'b0;
     
 	// wire inNote11, inNote12, inNote13, inNote14;
 	// // can genvar to check all notes in each row, since they should be the same color
@@ -301,7 +307,6 @@ module VGAController(
     // check_bounds note43(inNote43, NOTE_4_X, NOTE_POS4[2], NOTE_WIDTH, x, y);
     // check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
     // or(color4, inNote41, inNote42, inNote43, inNote44);
-
 
 
     wire [11:0] felixColor;
