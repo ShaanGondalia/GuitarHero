@@ -135,7 +135,7 @@ module VGAController(
 	end
 
 	reg[3:0] NOTES[0:62];
-	localparam MAX_NOTES_ON_SCREEN = 2;
+	localparam MAX_NOTES_ON_SCREEN = 3;
 	reg[31:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
 	reg[31:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
@@ -145,27 +145,27 @@ module VGAController(
 	reg maybe1, maybe2, maybe3, maybe4;
 	integer iinit;
 	initial begin
+	   NOTE_POS1[0] = 0;
+	   NOTE_POS1[1] = 100;
+	   NOTE_POS1[2] = -300;
 	   NOTE_POS2[0] = -200;
 	   NOTE_POS2[1] = 50;
+	   NOTE_POS2[2] = -300;
 	   NOTE_POS3[0] = -100;
 	   NOTE_POS3[1] = 300;
+	   NOTE_POS3[2] = -300;
 	   NOTE_POS4[0] = -200;
 	   NOTE_POS4[1] = 50;
+	   NOTE_POS4[2] = -300;
 //	   $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
 //	   #80
 		 // stores the notes we will load, in 4 bit code where a bit being high means that bar has a note 
 		 // mem file uses hex it seems like
-//        maybe1 = 1;
-//        maybe2 = 1;
-//        maybe3 = 1;
-//        maybe4 = 1;
-//        one = 32'd100;
-//        two = 32'd250;
 //        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
-//            maybe1 = $urandom%1;
-//            maybe2 = $urandom%1;
-//            maybe3 = $urandom%1;
-//            maybe4 = $urandom%1;
+//            maybe1 = $urandom%2;
+//            maybe2 = $urandom%2;
+//            maybe3 = $urandom%2;
+//            maybe4 = $urandom%2;
 
 //			NOTE_POS1[iinit] = maybe1 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
 //			NOTE_POS2[iinit] = maybe2 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
@@ -246,11 +246,23 @@ module VGAController(
 //             xtl = VIDEO_WIDTH - width;
 //    end
 
+    // draw line for notes to be played
+	reg [9:0] horLineX = 120;
+	reg [9:0] horLineY = 350;
+	reg [9:0] horLineWidthX = 400;
+	reg [9:0] horLineWidthY = 20;
+	wire horLine;
+	check_flex_bounds hor_line(horLine, horLineX, horLineY, horLineWidthX, horLineWidthY, x, y);
 
 	wire [MAX_NOTES_ON_SCREEN-1:0] inNote1, inNote2, inNote3, inNote4; // each bit is high if current x and y are in the note in NOTE_POS
+    wire [MAX_NOTES_ON_SCREEN-1:0] playNote1, playNote2, playNote3, playNote4;
     genvar g;
     generate
         for (g = 0; g < MAX_NOTES_ON_SCREEN; g = g + 1) begin: loop1
+            intersect check_int1(playNote1[g], NOTE_POS1[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int2(playNote2[g], NOTE_POS2[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int3(playNote3[g], NOTE_POS3[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int4(playNote4[g], NOTE_POS4[g], NOTE_WIDTH, horLineY, horLineWidthY);
 			check_bounds note1(inNote1[g], NOTE_1_X, NOTE_POS1[g], NOTE_WIDTH, x, y);
 			check_bounds note2(inNote2[g], NOTE_2_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
 			check_bounds note3(inNote3[g], NOTE_3_X, NOTE_POS3[g], NOTE_WIDTH, x, y);
@@ -260,6 +272,16 @@ module VGAController(
 //    wire t1, t2;
 //    check_bounds note1(t1, NOTE_1_X, one, NOTE_WIDTH, x, y);
 //    check_bounds note2(t2, NOTE_1_X, two, NOTE_WIDTH, x, y);
+    
+    wire note1sig, note2sig, note3sig, note4sig;
+    assign note1sig =|playNote1;
+    assign note2sig =|playNote2;
+    assign note3sig =|playNote3;
+    assign note4sig =|playNote4;
+    
+    intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
+    // assign debug1 =|playNote1;
+    // or(debug1, note1sig, note2sig, note3sig, note4sig);
     
     wire color1, color2, color3, color4;
 //    or(color1, inNote1[0], inNote1[1]);
@@ -301,15 +323,7 @@ module VGAController(
     // check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
     // or(color4, inNote41, inNote42, inNote43, inNote44);
 
-	// draw line for notes to be played
-	reg [9:0] horLineX = 120;
-	reg [9:0] horLineY = 350;
-	reg [9:0] horLineWidthX = 400;
-	reg [9:0] horLineWidthY = 20;
-	wire horLine;
-	check_flex_bounds hor_line(horLine, horLineX, horLineY, horLineWidthX, horLineWidthY, x, y);
 
-	intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
 
     wire [11:0] felixColor;
     assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : ( horLine ? 12'b111111110000 : colorData))));
