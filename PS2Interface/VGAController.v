@@ -16,7 +16,7 @@ module VGAController(
 	inout ps2_data);
 	
 	// Lab Memory Files Location
-	localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/guitar_hero/GuitarHero/PS2Interface/";
+	localparam FILES_PATH = "C:/Users/fj32/OneDrive - Duke University/Documents/guitar_hero3/GuitarHero/PS2Interface/";
 
 	// Clock divider 100 MHz -> 25 MHz
 	wire clk25; // 25MHz clock
@@ -134,32 +134,27 @@ module VGAController(
 	   	end
 	end
 
-	// reg[3:0] NOTES[0:62];
+	reg[3:0] NOTES[0:62];
 	localparam MAX_NOTES_ON_SCREEN = 2;
 	reg[31:0] NOTE_POS1[0:MAX_NOTES_ON_SCREEN - 1]; // top left corner of y positon of notes
 	reg[31:0] NOTE_POS2[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	
-//	reg[31:0] one = 100;
-//	reg[31:0] two = 200;
 	
 	reg maybe1, maybe2, maybe3, maybe4;
 	integer iinit;
 	initial begin
-//	   one = 100;
-//	   two = 200;
-	   NOTE_POS1[0] = -100;
-	   NOTE_POS1[1] = 300;
 	   NOTE_POS2[0] = -200;
 	   NOTE_POS2[1] = 50;
 	   NOTE_POS3[0] = -100;
 	   NOTE_POS3[1] = 300;
 	   NOTE_POS4[0] = -200;
 	   NOTE_POS4[1] = 50;
-		// $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
-		// stores the notes we will load, in 4 bit code where a bit being high means that bar has a note
-		// mem file uses hex it seems like
+//	   $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+//	   #80
+		 // stores the notes we will load, in 4 bit code where a bit being high means that bar has a note 
+		 // mem file uses hex it seems like
 //        maybe1 = 1;
 //        maybe2 = 1;
 //        maybe3 = 1;
@@ -191,7 +186,6 @@ module VGAController(
 	integer new_notes_index = 0; // index into NOTES, only increases
 	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
 	always @(posedge new_notes_clock) begin
-	    new_notes_index <= new_notes_index + 1;
 	    debug1 = ~debug1;
 //		if(NOTES[new_notes_index][3] == 0) begin
 //			NOTE_POS1[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
@@ -213,9 +207,8 @@ module VGAController(
 //		end else begin
 //			NOTE_POS4[curr_notes_index] = 60;
 //		end
-//		new_notes_index <= new_notes_index + 1;
-//		// curr_notes_index <= (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
-//		curr_notes_index <= curr_notes_index + 1;
+//		new_notes_index = new_notes_index + 1;
+//		curr_notes_index = (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
 	end
 
 	integer imove;
