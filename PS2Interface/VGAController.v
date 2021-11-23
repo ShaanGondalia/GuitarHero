@@ -182,11 +182,11 @@ module VGAController(
 	reg[9:0] NOTE_4_X = 470;
 	reg[6:0] NOTE_WIDTH = 50;
 
-    reg debug1 = 1;
+    // reg debug1;
 	integer new_notes_index = 0; // index into NOTES, only increases
 	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
 	always @(posedge new_notes_clock) begin
-	    debug1 = ~debug1;
+	    // debug1 = ~debug1;
 //		if(NOTES[new_notes_index][3] == 0) begin
 //			NOTE_POS1[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
 //		end else begin
@@ -308,6 +308,8 @@ module VGAController(
 	reg [9:0] horLineWidthY = 20;
 	wire horLine;
 	check_flex_bounds hor_line(horLine, horLineX, horLineY, horLineWidthX, horLineWidthY, x, y);
+
+	intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
 
     wire [11:0] felixColor;
     assign felixColor = color1 ? 12'b111100000000 : ( color2 ? 12'b000011110000 : ( color3 ? 12'b000000001111 : ( color4 ? 12'b101010101010 : ( horLine ? 12'b111111110000 : colorData))));
