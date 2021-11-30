@@ -115,20 +115,8 @@ module VGAController(
 	reg[26:0] screen_counter = 0;
 	reg[26:0] screen_limit = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
 
-	// new notes clock: how often we check for a new note
-	reg new_notes_clock = 0; // .5 Hz clock (new notes come on once every 2 seconds)
-	reg[32:0] new_notes_counter = 0;
-	reg[32:0] new_notes_limit = 49999999; // 100 MHz -> 0.5 Hz need counter limit = 100 000 000 / (2 * 0.5) - 1
-
 	// clock divider
 	always @(posedge clk) begin
-		if(new_notes_counter < new_notes_limit)
-	       new_notes_counter <= new_notes_counter + 1;
-	   	else begin
-	       new_notes_counter <= 0;
-	       new_notes_clock <= ~new_notes_clock;
-		end
-
 		if(screen_counter < screen_limit)
 	       screen_counter <= screen_counter + 1;
 	   	else begin
@@ -144,40 +132,6 @@ module VGAController(
 	reg[31:0] NOTE_POS3[0:MAX_NOTES_ON_SCREEN - 1];
 	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	
-	
-//	reg maybe1, maybe2, maybe3, maybe4;
-//	integer iinit;
-//	initial begin
-//	   NOTE_POS1[0] = 0;
-//	   NOTE_POS1[1] = 100;
-//	   NOTE_POS1[2] = -300;
-//	   NOTE_POS2[0] = -200;
-//	   NOTE_POS2[1] = 50;
-//	   NOTE_POS2[2] = -300;
-//	   NOTE_POS3[0] = -100;
-//	   NOTE_POS3[1] = 300;
-//	   NOTE_POS3[2] = -300;
-//	   NOTE_POS4[0] = -200;
-//	   NOTE_POS4[1] = 50;
-//	   NOTE_POS4[2] = -300;
-////	   $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
-////	   #80
-//		 // stores the notes we will load, in 4 bit code where a bit being high means that bar has a note 
-//		 // mem file uses hex it seems like
-////        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
-////            maybe1 = $urandom%2;
-////            maybe2 = $urandom%2;
-////            maybe3 = $urandom%2;
-////            maybe4 = $urandom%2;
-
-////			NOTE_POS1[iinit] = maybe1 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-////			NOTE_POS2[iinit] = maybe2 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-////			NOTE_POS3[iinit] = maybe3 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-////			NOTE_POS4[iinit] = maybe4 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-////		end
-//        $finish;
-//	end
-	
     reg NOTE_SPEED = 1;
 	reg[9:0] NOTE_1_X = 170;
 	reg[9:0] NOTE_2_X = 270;
@@ -185,8 +139,8 @@ module VGAController(
 	reg[9:0] NOTE_4_X = 470;
 	reg[6:0] NOTE_WIDTH = 50;
 
+    // move notes
 	integer imove;
-	// move notes
 	always @(posedge screen_clock) begin
 	    // vivado doesn't like i++
 //	    one = one + NOTE_SPEED;
@@ -262,9 +216,6 @@ module VGAController(
             intersect check_int4(playNote4[g], NOTE_POS4[g], NOTE_WIDTH, horLineY, horLineWidthY);
         end
     endgenerate
-//    wire t1, t2;
-//    check_bounds note1(t1, NOTE_1_X, one, NOTE_WIDTH, x, y);
-//    check_bounds note2(t2, NOTE_1_X, two, NOTE_WIDTH, x, y);
     
     wire note1sig, note2sig, note3sig, note4sig;
     assign note1sig =|playNote1;
@@ -277,50 +228,12 @@ module VGAController(
     assign debug3 = note3sig;
     assign debug4 = note4sig;
     
-    // intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
-    // assign debug1 =|playNote1;
-    // or(debug1, note1sig, note2sig, note3sig, note4sig);
-    
     wire color1, color2, color3, color4;
-//    or(color1, inNote1[0], inNote1[1]);
+
 	assign color1 =|inNote1; // reduction operator OR
 	assign color2 =|inNote2;
 	assign color3 =|inNote3;
 	assign color4 =|inNote4;
-//    or(color1, t1, t2);
-//    assign color2 = 1'b0;
-//    assign color3 = 1'b0;
-//    assign color4 = 1'b0;
-    
-	// wire inNote11, inNote12, inNote13, inNote14;
-	// // can genvar to check all notes in each row, since they should be the same color
-    // check_bounds note11(inNote11, NOTE_1_X, NOTE_POS1[0], NOTE_WIDTH, x, y);
-    // check_bounds note12(inNote12, NOTE_1_X, NOTE_POS1[1], NOTE_WIDTH, x, y);
-    // check_bounds note13(inNote13, NOTE_1_X, NOTE_POS1[2], NOTE_WIDTH, x, y);
-    // check_bounds note14(inNote14, NOTE_1_X, NOTE_POS1[3], NOTE_WIDTH, x, y);
-    // or(color1, inNote11, inNote12, inNote13, inNote14);
-    
-    // wire inNote21, inNote22, inNote23, inNote24;
-    // check_bounds note21(inNote21, NOTE_2_X, NOTE_POS2[0], NOTE_WIDTH, x, y);
-    // check_bounds note22(inNote22, NOTE_2_X, NOTE_POS2[1], NOTE_WIDTH, x, y);
-    // check_bounds note23(inNote23, NOTE_2_X, NOTE_POS2[2], NOTE_WIDTH, x, y);
-    // check_bounds note24(inNote24, NOTE_2_X, NOTE_POS2[3], NOTE_WIDTH, x, y);
-    // or(color2, inNote21, inNote22, inNote23, inNote24);
-    
-    // wire inNote31, inNote32, inNote33, inNote34;
-    // check_bounds note31(inNote31, NOTE_3_X, NOTE_POS3[0], NOTE_WIDTH, x, y);
-    // check_bounds note32(inNote32, NOTE_3_X, NOTE_POS3[1], NOTE_WIDTH, x, y);
-    // check_bounds note33(inNote33, NOTE_3_X, NOTE_POS3[2], NOTE_WIDTH, x, y);
-    // check_bounds note34(inNote34, NOTE_3_X, NOTE_POS3[3], NOTE_WIDTH, x, y);
-    // or(color3, inNote31, inNote32, inNote33, inNote34);
-    
-    // wire inNote41, inNote42, inNote43, inNote44;
-    // check_bounds note41(inNote41, NOTE_4_X, NOTE_POS4[0], NOTE_WIDTH, x, y);
-    // check_bounds note42(inNote42, NOTE_4_X, NOTE_POS4[1], NOTE_WIDTH, x, y);
-    // check_bounds note43(inNote43, NOTE_4_X, NOTE_POS4[2], NOTE_WIDTH, x, y);
-    // check_bounds note44(inNote44, NOTE_4_X, NOTE_POS4[3], NOTE_WIDTH, x, y);
-    // or(color4, inNote41, inNote42, inNote43, inNote44);
-
 
 
     wire [11:0] felixColor;
