@@ -12,9 +12,8 @@ module seven_segment(input clk_in,
     bcd_to_seven_seg my_converter ( .val_in(routed_vals), .led_out(led_out));
     assign cat_out = ~led_out;
     assign an_out = ~segment_state;
-
     
-    always_comb begin
+    always begin
         case(segment_state)
             8'b0000_0001:   routed_vals = val_in[3:0];
             8'b0000_0010:   routed_vals = val_in[7:4];
@@ -24,11 +23,11 @@ module seven_segment(input clk_in,
             8'b0010_0000:   routed_vals = val_in[23:20];
             8'b0100_0000:   routed_vals = val_in[27:24];
             8'b1000_0000:   routed_vals = val_in[31:28];
-            default:        routed_vals = val_in[3:0];       
+            default:        routed_vals = val_in[3:0];  
         endcase
     end
     
-    always_ff @(posedge clk_in)begin
+    always @(posedge clk_in) begin
         if (rst_in)begin
             segment_state <= 8'b0000_0001;
             segment_counter <= 32'b0;

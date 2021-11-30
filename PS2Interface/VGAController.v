@@ -115,6 +115,10 @@ module VGAController(
 	reg[26:0] screen_counter = 0;
 	reg[26:0] screen_limit = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
 
+    reg led_clock = 0; // 60 Hz clock
+	reg[26:0] led_counter = 0;
+	reg[26:0] led_limit = 49999; // 100 MHz -> 1000 Hz need counter limit = 100 000 000 / (2 * 1000) - 1
+
 	// clock divider
 	always @(posedge clk) begin
 		if(screen_counter < screen_limit)
@@ -122,6 +126,12 @@ module VGAController(
 	   	else begin
 	       screen_counter <= 0;
 	       screen_clock <= ~screen_clock;
+	   	end
+	   	if(led_counter < led_limit)
+	       led_counter <= led_counter + 1;
+	   	else begin
+	       led_counter <= 0;
+	       led_clock <= ~led_clock;
 	   	end
 	end
 
