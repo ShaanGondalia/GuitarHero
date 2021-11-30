@@ -51,29 +51,42 @@ module custom_tb;
     assign hi =|felix;
     reg[3:0] maybe;
 
-    integer imove;
+    assign temp2 = m0;
+
+    bin2bcd ftest(temp2[13:0], temp1[15:0]);
+
     initial begin
-        m0 = 0;
-        #20
-        $display("Loading mem %b", hi);
-        // $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
-        $readmemh("Notes.mem", NOTES);
-        #10
         for(i = 0; i < 16; i = i + 1) begin
+            m0 = i;
             #20;
-            maybe = $urandom%2;
-			m1 = maybe ? (-1 * i * 64) : (i * 64);
-			$display("maybe: %b m1: %b", maybe, m1);
-            // $display("i: %d notes: %b", i, NOTES[i]);
-            // $display("1st bit: %b", NOTES[i][3]);
-            // if(NOTES[i][3] == 0) begin
-            //     $display("zero %b", felix);
-            // end else begin
-            //     $display("not zero %b", felix);
-            // end
+			$display("integer: %3d binary: %b bcd: %b", i, temp2[13:0], temp1[15:0]);
         end
 		$finish;
 	end
+
+    integer imove;
+    // initial begin
+    //     m0 = 0;
+    //     #20
+    //     $display("Loading mem %b", hi);
+    //     // $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+    //     $readmemh("Notes.mem", NOTES);
+    //     #10
+    //     for(i = 0; i < 16; i = i + 1) begin
+    //         #20;
+    //         maybe = $urandom%2;
+	// 		m1 = maybe ? (-1 * i * 64) : (i * 64);
+	// 		$display("maybe: %b m1: %b", maybe, m1);
+    //         // $display("i: %d notes: %b", i, NOTES[i]);
+    //         // $display("1st bit: %b", NOTES[i][3]);
+    //         // if(NOTES[i][3] == 0) begin
+    //         //     $display("zero %b", felix);
+    //         // end else begin
+    //         //     $display("not zero %b", felix);
+    //         // end
+    //     end
+	// 	$finish;
+	// end
 
     // reg[31:0] NOTE_POS1[0:39];
     // reg[31:0] NOTE_POS2[0:39];
