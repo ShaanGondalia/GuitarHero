@@ -145,38 +145,38 @@ module VGAController(
 	reg[31:0] NOTE_POS4[0:MAX_NOTES_ON_SCREEN - 1];
 	
 	
-	reg maybe1, maybe2, maybe3, maybe4;
-	integer iinit;
-	initial begin
-	   NOTE_POS1[0] = 0;
-	   NOTE_POS1[1] = 100;
-	   NOTE_POS1[2] = -300;
-	   NOTE_POS2[0] = -200;
-	   NOTE_POS2[1] = 50;
-	   NOTE_POS2[2] = -300;
-	   NOTE_POS3[0] = -100;
-	   NOTE_POS3[1] = 300;
-	   NOTE_POS3[2] = -300;
-	   NOTE_POS4[0] = -200;
-	   NOTE_POS4[1] = 50;
-	   NOTE_POS4[2] = -300;
-//	   $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
-//	   #80
-		 // stores the notes we will load, in 4 bit code where a bit being high means that bar has a note 
-		 // mem file uses hex it seems like
-//        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
-//            maybe1 = $urandom%2;
-//            maybe2 = $urandom%2;
-//            maybe3 = $urandom%2;
-//            maybe4 = $urandom%2;
+//	reg maybe1, maybe2, maybe3, maybe4;
+//	integer iinit;
+//	initial begin
+//	   NOTE_POS1[0] = 0;
+//	   NOTE_POS1[1] = 100;
+//	   NOTE_POS1[2] = -300;
+//	   NOTE_POS2[0] = -200;
+//	   NOTE_POS2[1] = 50;
+//	   NOTE_POS2[2] = -300;
+//	   NOTE_POS3[0] = -100;
+//	   NOTE_POS3[1] = 300;
+//	   NOTE_POS3[2] = -300;
+//	   NOTE_POS4[0] = -200;
+//	   NOTE_POS4[1] = 50;
+//	   NOTE_POS4[2] = -300;
+////	   $readmemh({FILES_PATH, "Notes.mem"}, NOTES);
+////	   #80
+//		 // stores the notes we will load, in 4 bit code where a bit being high means that bar has a note 
+//		 // mem file uses hex it seems like
+////        for(iinit = 0; iinit < MAX_NOTES_ON_SCREEN; iinit = iinit + 1) begin
+////            maybe1 = $urandom%2;
+////            maybe2 = $urandom%2;
+////            maybe3 = $urandom%2;
+////            maybe4 = $urandom%2;
 
-//			NOTE_POS1[iinit] = maybe1 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-//			NOTE_POS2[iinit] = maybe2 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-//			NOTE_POS3[iinit] = maybe3 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-//			NOTE_POS4[iinit] = maybe4 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
-//		end
-        $finish;
-	end
+////			NOTE_POS1[iinit] = maybe1 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+////			NOTE_POS2[iinit] = maybe2 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+////			NOTE_POS3[iinit] = maybe3 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+////			NOTE_POS4[iinit] = maybe4 ? (-1 * iinit * 100) : VIDEO_HEIGHT;
+////		end
+//        $finish;
+//	end
 	
     reg NOTE_SPEED = 1;
 	reg[9:0] NOTE_1_X = 170;
@@ -184,35 +184,6 @@ module VGAController(
 	reg[9:0] NOTE_3_X = 370;
 	reg[9:0] NOTE_4_X = 470;
 	reg[6:0] NOTE_WIDTH = 50;
-
-    // reg debug1;
-	integer new_notes_index = 0; // index into NOTES, only increases
-	integer curr_notes_index = 0; // index into NOTE_POS, will loop back around after some note is done
-	always @(posedge new_notes_clock) begin
-	    // debug1 = ~debug1;
-//		if(NOTES[new_notes_index][3] == 0) begin
-//			NOTE_POS1[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
-//		end else begin
-//			NOTE_POS1[curr_notes_index] = 30;
-//		end
-//		if(NOTES[new_notes_index][2] == 0) begin
-//			NOTE_POS2[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
-//		end else begin
-//			NOTE_POS2[curr_notes_index] = 40;
-//		end
-//		if(NOTES[new_notes_index][1] == 0) begin
-//			NOTE_POS3[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
-//		end else begin
-//			NOTE_POS3[curr_notes_index] = 50;
-//		end
-//		if(NOTES[new_notes_index][0] == 0) begin
-//			NOTE_POS4[curr_notes_index] = VIDEO_HEIGHT; // don't want to display it
-//		end else begin
-//			NOTE_POS4[curr_notes_index] = 60;
-//		end
-//		new_notes_index = new_notes_index + 1;
-//		curr_notes_index = (curr_notes_index + 1) % MAX_NOTES_ON_SCREEN;
-	end
 
 	integer imove;
 	// move notes
@@ -225,6 +196,21 @@ module VGAController(
 		 	NOTE_POS2[imove] = NOTE_POS2[imove] + NOTE_SPEED;
 		 	NOTE_POS3[imove] = NOTE_POS3[imove] + NOTE_SPEED;
 		 	NOTE_POS4[imove] = NOTE_POS4[imove] + NOTE_SPEED;
+		 end
+		 
+		 if (reset) begin
+           NOTE_POS1[0] = 0;
+           NOTE_POS1[1] = 100;
+           NOTE_POS1[2] = -300;
+           NOTE_POS2[0] = -200;
+           NOTE_POS2[1] = 50;
+           NOTE_POS2[2] = -300;
+           NOTE_POS3[0] = -100;
+           NOTE_POS3[1] = 300;
+           NOTE_POS3[2] = -300;
+           NOTE_POS4[0] = -200;
+           NOTE_POS4[1] = 50;
+           NOTE_POS4[2] = -300;
 		 end
 	end
 	
