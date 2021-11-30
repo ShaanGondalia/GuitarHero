@@ -10,6 +10,8 @@ module VGAController(
 	output debug2,
 	output debug3,
 	output debug4,
+	output [7:0] cathode,     // for LED
+	output [7:0] anode,       // for LED
 	output hSync, 		// H Sync Signal
 	output vSync, 		// Veritcal Sync Signal
 	output[3:0] VGA_R,  // Red Signal Bits
@@ -115,10 +117,15 @@ module VGAController(
 	reg[26:0] screen_counter = 0;
 	reg[26:0] screen_limit = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
 
-    reg led_clock = 0; // 60 Hz clock
+    reg led_clock = 0;
 	reg[26:0] led_counter = 0;
-	reg[26:0] led_limit = 49999; // 100 MHz -> 1000 Hz need counter limit = 100 000 000 / (2 * 1000) - 1
+	reg[26:0] led_limit = 100000000 / (2 * 10000);
 
+    // temp for testing
+    reg[26:0] score_counter = 0;
+    reg[26:0] score_limit = 100000000 / (2 * 20) - 1;
+    reg[31:0] sample_score = 9500;
+    
 	// clock divider
 	always @(posedge clk) begin
 		if(screen_counter < screen_limit)
@@ -132,6 +139,13 @@ module VGAController(
 	   	else begin
 	       led_counter <= 0;
 	       led_clock <= ~led_clock;
+	   	end
+	   	
+	   	if(score_counter < score_limit)
+	       score_counter <= score_counter + 1;
+	   	else begin
+	       score_counter <= 0;
+	       sample_score <= sample_score + 1;
 	   	end
 	end
 
@@ -244,6 +258,14 @@ module VGAController(
 	assign color2 =|inNote2;
 	assign color3 =|inNote3;
 	assign color4 =|inNote4;
+	
+	wire [7:0] cat_out;
+	wire [3:0] an_out;
+    
+    seven_segment score_display(led_clock, reset, sample_score, cat_out, an_out);
+    
+    assign cathode = cat_out;
+    assign anode = {4'b1111, an_out};
 
 
     wire [11:0] felixColor;
