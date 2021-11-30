@@ -18,28 +18,12 @@ module seven_segment(input clk_in,
     assign cat_out = {1'b1, led_out}; // make decimal the 1
     assign an_out = ~segment_state;
     
-//    always @(segment_state) begin
-//        case(segment_state)
-//            4'b0001:   routed_vals = bcd[3:0];
-//            4'b0010:   routed_vals = bcd[7:4];
-//            4'b0100:   routed_vals = bcd[11:8];
-//            4'b1000:   routed_vals = bcd[15:12];
-//            default:   routed_vals = bcd[3:0];
-//        endcase
-//    end
     
     always @(posedge clk_in) begin
         if (rst_in)begin
-            segment_state <= 4'b0001;
-            segment_counter <= 32'b0;
+            segment_state = 4'b0001;
         end else begin
-            segment_state <= {segment_state[2:0],segment_state[3]};
-//            if (segment_counter < 32'd100000) begin
-//                segment_counter <= 32'd0;
-//                segment_state <= {segment_state[2:0],segment_state[3]};
-//            end else begin
-//                segment_counter <= segment_counter + 1;
-//            end
+            segment_state = {segment_state[2:0],segment_state[3]};
         end
         
         case(segment_state)
