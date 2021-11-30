@@ -31,10 +31,10 @@ module bcd_to_seven_seg (input [3:0] val_in, output [6:0] led_out);
     assign led_out[3] = bcd1 | bcd4 | bcd7;
 
     // E
-    assign led_out[2] = bcd1 | bcd3 | bcd4 | bcd7 | bcd9;
+    assign led_out[2] = bcd1 | bcd3 | bcd4 | bcd5 | bcd7 | bcd9;
 
     // F
-    assign led_out[1] = bcd1 | bcd2 | bcd3 | bcd5 | bcd7;
+    assign led_out[1] = bcd1 | bcd2 | bcd3 | bcd7;
 
     // G
     assign led_out[0] = bcd0 | bcd1 | bcd7;
