@@ -25,6 +25,8 @@ module custom_tb;
     //
     // iverilog -o f_custom_tb.vvp -s custom_tb custom_tb.v
     //
+    // iverilog -o f_custom_tb.vvp -s custom_tb custom_tb.v seven_segment_led/bcd_to_seven_seg.v seven_segment_led/bin2bcd.v seven_segment_led/seven_segment.v
+    //
     ///////////////////
     
     // VGAController vga(clock, 1'b0, 1'b1, 1'b1, 1'b1, 1'b1, t1, t2, t3, temp1[3:0], temp2[3:0], temp3[3:0], t4, t5, t6, t7);
@@ -53,13 +55,21 @@ module custom_tb;
 
     assign temp2 = m0;
 
-    bin2bcd ftest(temp2[13:0], temp1[15:0]);
+    // bin2bcd ftest(temp2[13:0], temp1[15:0]);
+
+    seven_segment segtest(clock, 1'b0, temp2, temp1[7:0], temp3[3:0]);
+    bcd_to_seven_seg fsklefj(temp2[3:0], temp4[6:0]);
 
     initial begin
+        $dumpfile("gtkwave.vcd");
+		// Module to capture and what level, 0 means all wires
+		$dumpvars(0, custom_tb);
         for(i = 0; i < 16; i = i + 1) begin
             m0 = i;
             #20;
-			$display("integer: %3d binary: %b bcd: %b", i, temp2[13:0], temp1[15:0]);
+            // $display("bcd in: %b, cathode out: %b", temp2[3:0], temp4[6:0]);
+            $display("binary in: %b, cathode: %b, anode: %b", temp2, temp1[7:0], temp3[3:0]);
+			// $display("integer: %3d binary: %b bcd: %b", i, temp2[13:0], temp1[15:0]);
         end
 		$finish;
 	end
@@ -107,6 +117,6 @@ module custom_tb;
     // end
 
     always
-        #40 clock = !clock;
+        #5 clock = !clock;
 
 endmodule
