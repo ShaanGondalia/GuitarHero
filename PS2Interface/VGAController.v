@@ -7,6 +7,9 @@ module VGAController(
 	input move_right,
 	input move_left,
 	output debug1,
+	output debug2,
+	output debug3,
+	output debug4,
 	output hSync, 		// H Sync Signal
 	output vSync, 		// Veritcal Sync Signal
 	output[3:0] VGA_R,  // Red Signal Bits
@@ -255,18 +258,22 @@ module VGAController(
 	check_flex_bounds hor_line(horLine, horLineX, horLineY, horLineWidthX, horLineWidthY, x, y);
 
 	wire [MAX_NOTES_ON_SCREEN-1:0] inNote1, inNote2, inNote3, inNote4; // each bit is high if current x and y are in the note in NOTE_POS
-    wire [MAX_NOTES_ON_SCREEN-1:0] playNote1, playNote2, playNote3, playNote4;
     genvar g;
     generate
         for (g = 0; g < MAX_NOTES_ON_SCREEN; g = g + 1) begin: loop1
-            intersect check_int1(playNote1[g], NOTE_POS1[g], NOTE_WIDTH, horLineY, horLineWidthY);
-            intersect check_int2(playNote2[g], NOTE_POS2[g], NOTE_WIDTH, horLineY, horLineWidthY);
-            intersect check_int3(playNote3[g], NOTE_POS3[g], NOTE_WIDTH, horLineY, horLineWidthY);
-            intersect check_int4(playNote4[g], NOTE_POS4[g], NOTE_WIDTH, horLineY, horLineWidthY);
 			check_bounds note1(inNote1[g], NOTE_1_X, NOTE_POS1[g], NOTE_WIDTH, x, y);
 			check_bounds note2(inNote2[g], NOTE_2_X, NOTE_POS2[g], NOTE_WIDTH, x, y);
 			check_bounds note3(inNote3[g], NOTE_3_X, NOTE_POS3[g], NOTE_WIDTH, x, y);
 			check_bounds note4(inNote4[g], NOTE_4_X, NOTE_POS4[g], NOTE_WIDTH, x, y);
+        end
+    endgenerate
+    wire [MAX_NOTES_ON_SCREEN-1:0] playNote1, playNote2, playNote3, playNote4;
+    generate
+        for (g = 0; g < MAX_NOTES_ON_SCREEN; g = g + 1) begin: loop2
+            intersect check_int1(playNote1[g], NOTE_POS1[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int2(playNote2[g], NOTE_POS2[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int3(playNote3[g], NOTE_POS3[g], NOTE_WIDTH, horLineY, horLineWidthY);
+            intersect check_int4(playNote4[g], NOTE_POS4[g], NOTE_WIDTH, horLineY, horLineWidthY);
         end
     endgenerate
 //    wire t1, t2;
@@ -279,7 +286,12 @@ module VGAController(
     assign note3sig =|playNote3;
     assign note4sig =|playNote4;
     
-    intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
+    assign debug1 = note1sig;
+    assign debug2 = note2sig;
+    assign debug3 = note3sig;
+    assign debug4 = note4sig;
+    
+    // intersect check_int(debug1, NOTE_POS1[0], NOTE_WIDTH, horLineY, horLineWidthY);
     // assign debug1 =|playNote1;
     // or(debug1, note1sig, note2sig, note3sig, note4sig);
     
