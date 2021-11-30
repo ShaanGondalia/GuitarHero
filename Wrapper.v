@@ -36,7 +36,7 @@ module Wrapper (clock, reset, gameclk, buttons, intersections, strum, score);
 		memAddr, memDataIn, memDataOut, procscore;
 
 	// ADD YOUR MEMORY FILE HERE
-	localparam INSTR_FILE = "guitar_hero";
+	localparam INSTR_FILE = "C:/Users/fj32/OneDrive - Duke University/Documents/guitar_hero3/GuitarHero/Test Files/Memory Files/guitar_hero";
 	
 	// Main Processing Unit
 	processor CPU(.clock(clock), .reset(reset), 

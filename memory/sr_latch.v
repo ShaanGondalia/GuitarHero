@@ -7,7 +7,7 @@ module sr_latch(S, R, Q, Qnot, en);
 
 	assign w1 = R & en;
 	assign w2 = S & en;
-	assign Q = w1 ~| Qnot;
-	assign Qnot = w2 ~| Q;
+    assign Q = w1 |~ Qnot;
+    assign Qnot = w2 |~ Q;
 
 endmodule
