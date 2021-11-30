@@ -20,21 +20,26 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module FPGA_Tester(clk, reset, buttons, intersections, strum, lower_score);
+module FPGA_Tester(clk, reset, buttons, intersections, strum, lower_score, high_buttons, button_out);
     input clk;
     input reset;
     input [3:0] buttons;
     input [3:0] intersections;
     input strum;
     
-    output [15:0] lower_score;
+    output [7:0] lower_score;
+    output [3:0] high_buttons;
+    output [3:0] button_out;
     
     wire [31:0] procscore;
+    
+    assign button_out = buttons;
+    assign high_buttons = 4'b1111;
     
     Wrapper w(.clock(procclk), .reset(reset), .gameclk(gameclk), 
         .buttons(buttons), 
         .intersections(intersections), 
-        .strum(strum), 
+        .strum(~strum), 
         .score(procscore));
         
     localparam MHz = 1000000;
