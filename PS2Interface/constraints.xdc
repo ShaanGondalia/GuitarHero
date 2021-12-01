@@ -112,4 +112,6 @@ set_property PACKAGE_PIN C17 [get_ports strum]
 set_property IOSTANDARD LVCMOS33 [get_ports strum]
 
 set_property ALLOW_COMBINATORIAL_LOOPS true [get_nets -of_objects [get_cells {proc/CPU/dx_ir_reg/loop1[27].dff/q_i_10__14}]]
+set_property ALLOW_COMBINATORIAL_LOOPS true [get_nets -of_objects [get_cells {proc/CPU/dx_ir_reg/loop1[27].dff/q_i_10__16}]]
 set_property ALLOW_COMBINATORIAL_LOOPS true [get_nets -of_objects [get_cells {proc/CPU/dx_ir_reg/loop1[3].dff/q_i_6__53}]]
+set_property ALLOW_COMBINATORIAL_LOOPS true [get_nets -of_objects [get_cells {proc/CPU/dx_ir_reg/loop1[3].dff/q_i_6__47}]]

@@ -6,6 +6,9 @@ module VGAController(
 	input move_down,
 	input move_right,
 	input move_left,
+	input [3:0] buttons,
+	input strum,
+	output [3:0] buttonsHigh,
 	output debug1,
 	output debug2,
 	output debug3,
@@ -126,6 +129,14 @@ module VGAController(
     reg[26:0] score_limit = 100000000 / (2 * 20) - 1;
     reg[31:0] sample_score = 9500;
     
+    localparam MHz = 1000000;
+	localparam SYSTEM_FREQ = 100*MHz; // System clock frequency
+	
+	// Clock divider for processor (Running at 1 Mhz)
+	reg[23:0] ProcCounterLimit;
+	reg procclk = 0;
+	reg[23:0] proccounter = 0;
+    
 	// clock divider
 	always @(posedge clk) begin
 		if(screen_counter < screen_limit)
@@ -140,6 +151,14 @@ module VGAController(
 	       led_counter <= 0;
 	       led_clock <= ~led_clock;
 	   	end
+	   	
+	   	ProcCounterLimit = SYSTEM_FREQ / (2*MHz - 1);
+        if(proccounter < ProcCounterLimit)
+	       proccounter <= proccounter + 1;
+        else begin
+	       proccounter <=0;
+	       procclk <= ~procclk;
+        end
 	   	
 	   	if(score_counter < score_limit)
 	       score_counter <= score_counter + 1;
@@ -250,7 +269,7 @@ module VGAController(
     assign debug1 = note1sig;
     assign debug2 = note2sig;
     assign debug3 = note3sig;
-    assign debug4 = note4sig;
+    // assign debug4 = note4sig;
     
     wire color1, color2, color3, color4;
 
@@ -259,13 +278,24 @@ module VGAController(
 	assign color3 =|inNote3;
 	assign color4 =|inNote4;
 	
+	wire [31:0] game_score;
+	wire [3:0] intersections;
+	assign intersections = {note4sig, note3sig, note2sig, note1sig};
+    // if no notes are on screen, don't let strum happen
+	wire inStrum = (note4sig | note3sig | note2sig | note1sig) ? (~strum) : 1'b0;
+    Wrapper proc(procclk, reset, screen_clock, buttons, intersections, inStrum, game_score);
+    
+    assign debug4 = inStrum;
+    
 	wire [7:0] cat_out;
 	wire [3:0] an_out;
     
-    seven_segment score_display(led_clock, reset, sample_score, cat_out, an_out);
+    seven_segment score_display(led_clock, reset, game_score, cat_out, an_out);
     
     assign cathode = cat_out;
     assign anode = {4'b1111, an_out};
+    
+    assign buttonsHigh = 4'b1111;
 
 
     wire [11:0] felixColor;
