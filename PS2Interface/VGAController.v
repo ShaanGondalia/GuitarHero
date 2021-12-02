@@ -118,16 +118,12 @@ module VGAController(
 	// screen clock: how often to move pieces (25MHz clock is for VGATimingGenerator, not this clock)
 	reg screen_clock = 0; // 60 Hz clock
 	reg[26:0] screen_counter = 0;
-	reg[26:0] screen_limit = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
+	reg[26:0] screen_limit; // = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
+    reg[7:0] speed = 60; // the frequency of the screen clock
 
     reg led_clock = 0;
 	reg[26:0] led_counter = 0;
 	reg[26:0] led_limit = 100000000 / (2 * 10000);
-
-    // temp for testing
-    reg[26:0] score_counter = 0;
-    reg[26:0] score_limit = 100000000 / (2 * 20) - 1;
-    reg[31:0] sample_score = 9500;
     
     localparam MHz = 1000000;
 	localparam SYSTEM_FREQ = 100*MHz; // System clock frequency
@@ -139,6 +135,7 @@ module VGAController(
     
 	// clock divider
 	always @(posedge clk) begin
+	    screen_limit = SYSTEM_FREQ / (2 * speed) - 1;
 		if(screen_counter < screen_limit)
 	       screen_counter <= screen_counter + 1;
 	   	else begin
@@ -159,13 +156,6 @@ module VGAController(
 	       proccounter <=0;
 	       procclk <= ~procclk;
         end
-	   	
-	   	if(score_counter < score_limit)
-	       score_counter <= score_counter + 1;
-	   	else begin
-	       score_counter <= 0;
-	       sample_score <= sample_score + 1;
-	   	end
 	end
 
 	reg[3:0] NOTES[0:62];
@@ -181,6 +171,14 @@ module VGAController(
 	reg[9:0] NOTE_3_X = 370;
 	reg[9:0] NOTE_4_X = 470;
 	reg[6:0] NOTE_WIDTH = 50;
+	
+	wire actual_up;
+	wire actual_down;
+	debounce speed_up(clk, move_up, actual_up);
+	debounce speed_down(clk, move_down, actual_down);
+	reg[31:0] temp_score = 1000;
+    
+    // reg[2:0] level = 0;
 
     // move notes
 	integer imove;
@@ -196,6 +194,8 @@ module VGAController(
 		 end
 		 
 		 if (reset) begin
+		    speed = 60;
+		    temp_score = 1000;
             NOTE_POS4[0] = 0;
             NOTE_POS3[0] = -100;
             NOTE_POS2[0] = -200;
@@ -212,6 +212,16 @@ module VGAController(
             NOTE_POS3[3] = -1300;
             NOTE_POS2[3] = -1400;
             NOTE_POS1[3] = -1500;
+		 end
+		 
+		 if(actual_up) begin
+		      speed = speed + 2;
+		      temp_score = temp_score + 1;
+		 end
+		 
+		 if(actual_down) begin
+		      speed = speed - 2;
+		      temp_score = temp_score - 1;
 		 end
 	end
 	
@@ -294,7 +304,7 @@ module VGAController(
 	wire [7:0] cat_out;
 	wire [3:0] an_out;
     
-    seven_segment score_display(led_clock, reset, game_score, cat_out, an_out);
+    seven_segment score_display(led_clock, reset, temp_score, cat_out, an_out);
     
     assign cathode = cat_out;
     assign anode = {4'b1111, an_out};
