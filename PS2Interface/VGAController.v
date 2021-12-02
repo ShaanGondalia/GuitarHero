@@ -119,7 +119,7 @@ module VGAController(
 	reg screen_clock = 0; // 60 Hz clock
 	reg[26:0] screen_counter = 0;
 	reg[26:0] screen_limit; // = 833332; // 100 MHz -> 60 Hz need counter limit = 100 000 000 / (2 * 60) - 1
-    reg[7:0] speed = 60; // the frequency of the screen clock
+    reg[13:0] speed = 60; // the frequency of the screen clock
 
     reg led_clock = 0;
 	reg[26:0] led_counter = 0;
@@ -172,13 +172,17 @@ module VGAController(
 	reg[9:0] NOTE_4_X = 470;
 	reg[6:0] NOTE_WIDTH = 50;
 	
-	wire actual_up;
-	wire actual_down;
-	debounce speed_up(clk, move_up, actual_up);
-	debounce speed_down(clk, move_down, actual_down);
-	reg[31:0] temp_score = 1000;
+	wire speed_up;
+	wire speed_down;
+	wire level_up;
+	wire level_down;
+	debounce speed_up_button(clk, move_up, speed_up);
+	debounce speed_down_button(clk, move_down, speed_down);
+	debounce level_up_button(clk, move_right, level_up);
+	debounce level_down_button(clk, move_left, level_down);
     
-    // reg[2:0] level = 0;
+    // only shows 2 digits but 14 bits just for ease into seven segment
+    reg[13:0] level = 0;
 
     // move notes
 	integer imove;
@@ -195,33 +199,74 @@ module VGAController(
 		 
 		 if (reset) begin
 		    speed = 60;
-		    temp_score = 1000;
-            NOTE_POS4[0] = 0;
-            NOTE_POS3[0] = -100;
-            NOTE_POS2[0] = -200;
-            NOTE_POS1[0] = -300;
-            NOTE_POS4[1] = -400;
-            NOTE_POS3[1] = -500;
-            NOTE_POS2[1] = -600;
-            NOTE_POS1[1] = -700;
-            NOTE_POS4[2] = -800;
-            NOTE_POS3[2] = -900;
-            NOTE_POS2[2] = -1000;
-            NOTE_POS1[2] = -1100;
-            NOTE_POS4[3] = -1200;
-            NOTE_POS3[3] = -1300;
-            NOTE_POS2[3] = -1400;
-            NOTE_POS1[3] = -1500;
+		    if(level == 0) begin
+		        NOTE_POS4[0] = 0;
+                NOTE_POS3[0] = -100;
+                NOTE_POS2[0] = -200;
+                NOTE_POS1[0] = -300;
+                NOTE_POS4[1] = -400;
+                NOTE_POS3[1] = -500;
+                NOTE_POS2[1] = -600;
+                NOTE_POS1[1] = -700;
+                NOTE_POS4[2] = -800;
+                NOTE_POS3[2] = -900;
+                NOTE_POS2[2] = -1000;
+                NOTE_POS1[2] = -1100;
+                NOTE_POS4[3] = -1200;
+                NOTE_POS3[3] = -1300;
+                NOTE_POS2[3] = -1400;
+                NOTE_POS1[3] = -1500;
+		    end else if(level == 1) begin
+		        NOTE_POS4[0] = 0;
+                NOTE_POS3[0] = 0;
+                NOTE_POS2[0] = 0;
+                NOTE_POS1[0] = 0;
+                NOTE_POS4[1] = -400;
+                NOTE_POS3[1] = -500;
+                NOTE_POS2[1] = -600;
+                NOTE_POS1[1] = -700;
+                NOTE_POS4[2] = -800;
+                NOTE_POS3[2] = -900;
+                NOTE_POS2[2] = -1000;
+                NOTE_POS1[2] = -1100;
+                NOTE_POS4[3] = -1200;
+                NOTE_POS3[3] = -1300;
+                NOTE_POS2[3] = -1400;
+                NOTE_POS1[3] = -1500;
+		    end else begin
+		        NOTE_POS4[0] = -100;
+                NOTE_POS3[0] = -100;
+                NOTE_POS2[0] = -100;
+                NOTE_POS1[0] = -100;
+                NOTE_POS4[1] = -200;
+                NOTE_POS3[1] = -200;
+                NOTE_POS2[1] = -200;
+                NOTE_POS1[1] = -200;
+                NOTE_POS4[2] = -300;
+                NOTE_POS3[2] = -300;
+                NOTE_POS2[2] = -300;
+                NOTE_POS1[2] = -300;
+                NOTE_POS4[3] = -400;
+                NOTE_POS3[3] = -400;
+                NOTE_POS2[3] = -400;
+                NOTE_POS1[3] = -400;
+		    end
 		 end
 		 
-		 if(actual_up) begin
+		 if(speed_up) begin
 		      speed = speed + 2;
-		      temp_score = temp_score + 1;
 		 end
 		 
-		 if(actual_down) begin
+		 if(speed_down) begin
 		      speed = speed - 2;
-		      temp_score = temp_score - 1;
+		 end
+		 
+		 if(level_up) begin
+		      level = level + 1;
+		 end
+		 
+		 if(level_down) begin
+		      level = level - 1;
 		 end
 	end
 	
@@ -302,12 +347,12 @@ module VGAController(
     assign debug4 = inStrum;
     
 	wire [7:0] cat_out;
-	wire [3:0] an_out;
+	wire [7:0] an_out;
     
-    seven_segment score_display(led_clock, reset, temp_score, cat_out, an_out);
+    seven_segment score_display(led_clock, reset, game_score, speed, level, cat_out, an_out);
     
     assign cathode = cat_out;
-    assign anode = {4'b1111, an_out};
+    assign anode = an_out;
     
     assign buttonsHigh = 4'b1111;
 
