@@ -1,5 +1,9 @@
 import sys
 
+# python script takes in hex input and converts to notes
+# A   B   C   D   E   F
+# 10  11  12  13  14  15
+
 # convert string hex to int decimal
 def hex_to_int(n):
     return int(n, 16)
