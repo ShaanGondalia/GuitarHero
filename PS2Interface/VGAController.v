@@ -199,7 +199,62 @@ module VGAController(
 		 
 		 if (reset) begin
 		    speed = 60;
-		    if(level == 0) begin
+		    if(level == 1) begin
+		    // all notes
+		        NOTE_POS1[0] = 0;
+                NOTE_POS2[0] = 0;
+                NOTE_POS3[0] = 0;
+                NOTE_POS4[0] = 0;
+                NOTE_POS1[1] = -100;
+                NOTE_POS2[1] = -100;
+                NOTE_POS3[1] = -100;
+                NOTE_POS4[1] = -100;
+                NOTE_POS1[2] = -200;
+                NOTE_POS2[2] = -200;
+                NOTE_POS3[2] = -200;
+                NOTE_POS4[2] = -200;
+                NOTE_POS1[3] = -300;
+                NOTE_POS2[3] = -300;
+                NOTE_POS3[3] = -300;
+                NOTE_POS4[3] = -300;
+		    end else if(level == 2) begin
+		    // heart
+		        NOTE_POS2[0] = 0;
+                NOTE_POS3[0] = 0;
+                NOTE_POS1[0] = -100;
+                NOTE_POS4[0] = -100;
+                NOTE_POS1[1] = -200;
+                NOTE_POS4[1] = -200;
+                NOTE_POS2[1] = -300;
+                NOTE_POS3[1] = -300;
+                NOTE_POS1[2] = -400;
+                NOTE_POS2[2] = -400;
+                NOTE_POS3[2] = -400;
+                NOTE_POS4[2] = -400;
+                NOTE_POS1[3] = -500;
+                NOTE_POS2[3] = -500;
+                NOTE_POS3[3] = -500;
+                NOTE_POS4[3] = -500;
+		    end else if(level == 3) begin
+		    // X
+		        NOTE_POS1[0] = 0;
+                NOTE_POS4[0] = 0;
+                NOTE_POS2[0] = -100;
+                NOTE_POS3[0] = -100;
+                NOTE_POS2[1] = -200;
+                NOTE_POS3[1] = -200;
+                NOTE_POS1[1] = -300;
+                NOTE_POS4[1] = -300;
+                NOTE_POS1[2] = -400;
+                NOTE_POS2[2] = -400;
+                NOTE_POS3[2] = -400;
+                NOTE_POS4[2] = -400;
+                NOTE_POS1[3] = -500;
+                NOTE_POS2[3] = -500;
+                NOTE_POS3[3] = -500;
+                NOTE_POS4[3] = -500;
+		    end else begin
+		    // single notes
 		        NOTE_POS4[0] = 0;
                 NOTE_POS3[0] = -100;
                 NOTE_POS2[0] = -200;
@@ -216,40 +271,6 @@ module VGAController(
                 NOTE_POS3[3] = -1300;
                 NOTE_POS2[3] = -1400;
                 NOTE_POS1[3] = -1500;
-		    end else if(level == 1) begin
-		        NOTE_POS4[0] = 0;
-                NOTE_POS3[0] = 0;
-                NOTE_POS2[0] = 0;
-                NOTE_POS1[0] = 0;
-                NOTE_POS4[1] = -400;
-                NOTE_POS3[1] = -500;
-                NOTE_POS2[1] = -600;
-                NOTE_POS1[1] = -700;
-                NOTE_POS4[2] = -800;
-                NOTE_POS3[2] = -900;
-                NOTE_POS2[2] = -1000;
-                NOTE_POS1[2] = -1100;
-                NOTE_POS4[3] = -1200;
-                NOTE_POS3[3] = -1300;
-                NOTE_POS2[3] = -1400;
-                NOTE_POS1[3] = -1500;
-		    end else begin
-		        NOTE_POS4[0] = -100;
-                NOTE_POS3[0] = -100;
-                NOTE_POS2[0] = -100;
-                NOTE_POS1[0] = -100;
-                NOTE_POS4[1] = -200;
-                NOTE_POS3[1] = -200;
-                NOTE_POS2[1] = -200;
-                NOTE_POS1[1] = -200;
-                NOTE_POS4[2] = -300;
-                NOTE_POS3[2] = -300;
-                NOTE_POS2[2] = -300;
-                NOTE_POS1[2] = -300;
-                NOTE_POS4[3] = -400;
-                NOTE_POS3[3] = -400;
-                NOTE_POS2[3] = -400;
-                NOTE_POS1[3] = -400;
 		    end
 		 end
 		 
